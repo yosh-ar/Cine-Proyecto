@@ -12,6 +12,7 @@ class Server{
         // PATH USER
         this.paths = {
             auth: '/api/auth',
+            users: '/api/users',
         };
         
         // conexion
@@ -47,6 +48,7 @@ class Server{
     // se encargara de controlar las rutas
     routes(){
         this.app.use(this.paths.auth, require('../routers/auth.routes'));
+        this.app.use(this.paths.users, require('../routers/users/users.routes'));
     }
     // se encarga de encender nuestro servidor
     listen(){
