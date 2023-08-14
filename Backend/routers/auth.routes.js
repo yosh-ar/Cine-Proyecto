@@ -3,7 +3,7 @@ const {check} = require('express-validator');
 
 
 
-const {login} = require('../controllers/auth.controller');
+const {login,validarToken} = require('../controllers/auth.controller');
 const router = Router();
 
 router.post('/login', [
@@ -12,5 +12,5 @@ router.post('/login', [
     // validarCampos
 ], login)
 
-// router.post('/checkToken', validarToken);
+router.post('/checkToken', validarToken);
 module.exports = router;
