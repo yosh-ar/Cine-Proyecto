@@ -22,6 +22,7 @@
     "username": "Nombre de Usuario"
   },
   "menu": {
+    "movie" : "Peliculas",
     "home": "Inicio",
     "principal": "Principal",
     "users": "Usuarios",
@@ -35,6 +36,7 @@
     "ecommerce": "Comercio electrónico",
     "content": "Contenido",
     "pages": "Páginas",
+    "movies": "Cine",
     "data-list": "Lista Datos",
     "thumb-list": "Lista Pulgares",
     "image-list": "Lista Imagen",

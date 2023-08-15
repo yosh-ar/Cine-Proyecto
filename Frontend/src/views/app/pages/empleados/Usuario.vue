@@ -68,7 +68,7 @@
             >Debe ingresar el usuario del empleado</b-form-invalid-feedback
           >
         </b-form-group>
-        <b-form-group label="Contraseña empleado:" >
+        <b-form-group label="Contraseña:" >
             <b-form-input
             type= "password"
             :class="{ 'form-group--error': $v.form.password.$error }"
@@ -77,27 +77,10 @@
             :state="!$v.form.password.$error"
           ></b-form-input>
           <b-form-invalid-feedback
-            >Debe ingresar la contraseña del empleado</b-form-invalid-feedback
+            >Debe ingresar la contraseña</b-form-invalid-feedback
           >
         </b-form-group>
-        
-        <b-form-group :label="'Empleado:'">
-          <v-select
-            v-model.trim="$v.form.empleado.$model"
-            :state="!$v.form.empleado.$error"
-            :options="dataSelect"
-            label="nombre"
-          />
-          <div
-            :class="{
-              'invalid-feedback': true,
-              'd-block':
-                $v.form.empleado.$error && !$v.form.empleado.required,
-            }"
-          >
-            Debe seleccionar un empleado
-          </div>
-        </b-form-group>
+   
         <b-form-group :label="'Roles:'">
           <v-select
             v-model.trim="$v.form.role.$model"
@@ -133,7 +116,7 @@
       scrollable
       title="Editar Usuario"
     >
-         <b-form-group label="Usuario empleado:" >
+         <b-form-group label="Usuario:" >
             <b-form-input
         
             :class="{ 'form-group--error': $v.form.usuario.$error }"
@@ -142,10 +125,10 @@
             :state="!$v.form.usuario.$error"
           ></b-form-input>
           <b-form-invalid-feedback
-            >Debe ingresar el usuario del empleado</b-form-invalid-feedback
+            >Debe ingresar el usuario</b-form-invalid-feedback
           >
         </b-form-group>
-        <b-form-group label="Contraseña empleado:" >
+        <b-form-group label="Contraseña:" >
             <b-form-input
               type= "password"
             :class="{ 'form-group--error': $v.form.password.$error }"
@@ -154,26 +137,10 @@
             :state="!$v.form.password.$error"
           ></b-form-input>
           <b-form-invalid-feedback
-            >Debe ingresar la contraseña del empleado</b-form-invalid-feedback
+            >Debe ingresar la contraseña</b-form-invalid-feedback
           >
         </b-form-group>
-             <b-form-group :label="'Empleado:'">
-          <v-select
-            v-model.trim="$v.form.empleado.$model"
-            :state="!$v.form.empleado.$error"
-            :options="dataSelect"
-            label="nombre"
-          />
-          <div
-            :class="{
-              'invalid-feedback': true,
-              'd-block':
-                $v.form.empleado.$error && !$v.form.empleado.required,
-            }"
-          >
-            Debe seleccionar un empleado
-          </div>
-        </b-form-group>
+           
         <b-form-group :label="'Roles:'">
           <v-select
             v-model.trim="$v.form.role.$model"
@@ -245,21 +212,7 @@
             <!-- Botones -->
             <template slot="actions" slot-scope="props">
               <b-button-group>
-                <router-link
-                    :to="{
-                      name: 'view_user',
-                      params: { id: props.rowData.id },
-                    }"
-                  >
-                    <b-button
-                      squared
-                      class="mb-2"
-                      size="sm"
-                      variant="outline-success"
-                    >
-                      <i :class="'simple-icon-eye'" />
-                    </b-button>
-                  </router-link>
+                
                 <b-button v-if="props.rowData.estado_user == true"
                   @click="setData(props.rowData)"
                   v-b-modal.modal-edit
@@ -332,15 +285,14 @@ export default {
   data() {
     return {
         searchType: [
-            { nombre: "Nombre", value: "nombre_persona" },
-            { nombre: "Apellido", value: "apellido_persona" },
+            { nombre: "User", value: "usuario" },
         ],
         httpOptions: {
           headers: { "x-token": this.$store.state.token}
         },
         dataSelect: [],   
         dataSelect1: [],   
-        searchLabel: { nombre: "Nombre", value: "nombre_persona" },          
+        searchLabel: { nombre: "User", value: "usuario" },          
         repit : true,
         isLoad: false,
         apiBase: apiUrl + "/api/users/get",
@@ -389,22 +341,7 @@ export default {
             dataClass: "list-item-heading",
             width: "20%",
             },
-            {
-            name: "empleado.persona.nombre_persona",
-            sortField: "empleado.persona.nombre_persona",
-            title: "Nombre",
-            titleClass: "",
-            dataClass: "list-item-heading",
-            width: "20%",
-            },
-            {
-            name: "empleado.persona.apellido_persona",
-            sortField: "empleado.persona.apellido_persona",
-            title: "Apellido",
-            titleClass: "",
-            dataClass: "list-item-heading",
-            width: "20%",
-            },
+          
             {
             name: "role.rol",
             sortField: "role.rol",
@@ -443,13 +380,7 @@ export default {
   },
   methods: {
     // SELECT Empleado
-    async selectEmpleado() {
-      let me = this;
-      this.dataSelect = [];
-      const response = await axios.get(apiUrl + "/api/users/empleados",{headers: { "x-token": this.$store.state.token}});
-      me.dataSelect = response.data.data;
-    //   console.log(response)
-    },
+  
     // SELECT Role
     async selectRol() {
       let me = this;
@@ -462,12 +393,10 @@ export default {
       switch (model) {
         case "save": {
           this.$v.$reset();
-          this.selectEmpleado();
           this.selectRol();
           this.form.id= 0;
           this.form.usuario = "";
           this.form.password = "";
-          this.form.empleado = {};
           this.form.role = "";
           this.form.state = true;
           break;
@@ -482,7 +411,6 @@ export default {
           this.form.id= 0;
           this.form.usuario = "";
           this.form.password = "";
-          this.form.empleado = {};
           this.form.role = "";
           this.form.state = true;
           break;
@@ -507,12 +435,12 @@ export default {
     onSave() {
       const me = this;
       this.$refs["modalSave"].hide();
-        const {usuario, password, empleado, role } = this.form;
+        const {usuario, password,  role } = this.form;
         // console.log(TiendaId)
         // return 
       axios
         .post(apiUrl + "/api/users/store", {
-            usuario, password, empleado: empleado.id, rol: role.id
+            usuario, password, rol: role.id
         },{headers: { "x-token": this.$store.state.token}})
         .then((response) => {
           me.$notify(
@@ -537,7 +465,7 @@ export default {
       // console.log(empleado);
       axios
         .put(apiUrl + "/api/users/update", {
-              usuario, password, empleado: empleado.id, rol: role.id, id
+              usuario, password, rol: role.id, id
         },{headers: { "x-token": this.$store.state.token}})
         .then((response) => {
           me.$notify(
@@ -557,7 +485,9 @@ export default {
     onState() {
       //desactivar tipo
       const me = this;
+      // console.log(this.form.state, this.form.id)
       if (this.form.state == true) {
+        // console.log(this.form.state, 'entra')
         axios
           .put(apiUrl + "/api/users/desactivate", {
             id: this.form.id,
@@ -596,12 +526,9 @@ export default {
       }
     },
     setData(data) {
-      this.selectEmpleado();
       this.selectRol();
     //   this.form.nombre = data.persona.nombre_persona;
       this.form.state = data.estado_user;
-      this.form.empleado.nombre = data.empleado.persona.nombre_persona + ' ' +data.empleado.persona.apellido_persona; 
-      this.form.empleado.id = data.empleado.id; 
       this.form.role = data.role;
       this.form.usuario = data.usuario;
       this.form.state = data.estado_user;
