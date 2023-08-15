@@ -2,7 +2,7 @@ const {Router} = require('express');
 const {check} = require('express-validator');
 
 
-const {indexUser, postUser,updateUser,activarUser,desactivarUser} = require('../../controllers');
+const {indexUser, postUser,updateUser,activarUser,desactivarUser,selectRol} = require('../../controllers');
 const {rolIdExist,userIdExist} = require('../../helpers');
 const {validarCampos,validarToken} = require('../../middlewares');
 
@@ -11,7 +11,7 @@ router.get('/get', [
     validarToken,
     validarCampos
 ],indexUser);
-
+router.get('/rol',[validarToken,validarCampos], selectRol);
 router.post('/store',[
     validarToken,
     check('usuario', 'El usuario del empleado es necesario').not().isEmpty(),

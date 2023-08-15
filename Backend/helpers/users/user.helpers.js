@@ -1,3 +1,4 @@
+const {User, Rol} = require('../../models');
 const rolIdExist = async(id)=>{
     const rol = await Rol.findByPk(id);
     if(!rol){
@@ -6,6 +7,7 @@ const rolIdExist = async(id)=>{
 }
 const userIdExist = async(id)=>{
     const user = await User.findByPk(id);
+
     if(!user){
         throw new Error(`El id de la User no existe en nuestros registros`);
     }

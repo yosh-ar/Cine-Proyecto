@@ -132,7 +132,7 @@ const desactivarUser = async(req = resquest, res = response)=>{
         const user = await User.update({
             estado_user: 0,
         }, {where : {id : data.id}});
-
+        // console.log(user, data.id)
         res.json({
             msg : 'Actualización realizada con éxito'
         });
