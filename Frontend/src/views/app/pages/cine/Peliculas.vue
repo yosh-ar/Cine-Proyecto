@@ -42,7 +42,7 @@
   
   <script>
   import axios from "axios";
-  import { apiUrl } from "../../../../constants/config";
+  import { apiTMDB, apiKey } from "../../../../constants/config";
   import ListPageHeading from "../../../../containers/pages/ListPageHeading";
   import ListPageListing from "../../../../containers/pages/ListPageListing";
   
@@ -54,7 +54,7 @@
     data() {
       return {
         isLoad: false,
-        apiBase: apiUrl + "/cakes/fordatatable",
+        apiBase: apiTMDB + "/movie/popular?api_key=" + apiKey,
         displayMode: "image",
         sort: {
           column: "title",
