@@ -6,7 +6,8 @@ export const searchPath = `${adminRoot}/pages/miscellaneous/search`
 export const buyUrl = 'https://1.envato.market/nEyZa'
 // export const apiUrl = 'https://api.coloredstrategies.com';
 export const apiUrl = 'http://localhost:8090';
-
+export const BASE_URL = 'https://api.themoviedb.org/3'
+export const API_KEY = "5cf334e4000552b1b4724eb6ad837eb7";
 export const subHiddenBreakpoint = 1440
 export const menuHiddenBreakpoint = 768
 
