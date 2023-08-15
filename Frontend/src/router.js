@@ -77,13 +77,18 @@ const router = new VueRouter({
                         /* webpackChunkName: "dashboards" */ "./views/app/pages"
                       ),
                     children: [
-    
-                     
+
                       {
                         path: "movie",
                         name: "movie",
                         component: () =>
                           import("./views/app/pages/cine/Peliculas.vue"),
+                      },
+                      {
+                        path: "detalle/:id",
+                        name: "detalle",
+                        component: () =>
+                            import("./views/app/pages/cine/DetallePelicula.vue"),
                       },
                     ],
                   },

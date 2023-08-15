@@ -1,206 +1,110 @@
-
 <template>
-    <b-row>
-      <b-colxx class="disable-text-selection">
-        <list-page-heading
-          :title="$t('menu.image-list')"
-          :selectAll="selectAll"
-          :isSelectedAll="isSelectedAll"
-          :isAnyItemSelected="isAnyItemSelected"
-          :keymap="keymap"
-          :displayMode="displayMode"
-          :changeDisplayMode="changeDisplayMode"
-          :changeOrderBy="changeOrderBy"
-          :changePageSize="changePageSize"
-          :sort="sort"
-          :searchChange="searchChange"
-          :from="from"
-          :to="to"
-          :total="total"
-          :perPage="perPage"
-        ></list-page-heading>
-        <template v-if="isLoad">
-          <list-page-listing
-            :displayMode="displayMode"
-            :items="items"
-            :selectedItems="selectedItems"
-            :toggleItem="toggleItem"
-            :lastPage="lastPage"
-            :perPage="perPage"
-            :page="page"
-            :changePage="changePage"
-            :handleContextMenu="handleContextMenu"
-            :onContextMenuAction="onContextMenuAction"
-          ></list-page-listing>
-        </template>
-        <template v-else>
-          <div class="loading"></div>
-        </template>
-      </b-colxx>
-    </b-row>
-  </template>
-  
-  <script>
-  import axios from "axios";
-  import { apiTMDB, apiKey } from "../../../../constants/config";
-  import ListPageHeading from "../../../../containers/pages/ListPageHeading";
-  import ListPageListing from "../../../../containers/pages/ListPageListing";
-  
-  export default {
-    components: {
-      "list-page-heading": ListPageHeading,
-      "list-page-listing": ListPageListing
+  <div>
+    <h1>Listado de Películas</h1>
+    <div class="movie-list">
+      <div v-for="movie in displayedMovies" :key="movie.id">
+        <b-card no-body>
+          <div >
+            <router-link :to="{ name: 'detalle', params: { id: movie.id } }" class="w-40 w-sm-100">
+              <img :src="getPosterUrl(movie.poster_path)" class="card-img-top" :alt="movie.title" />
+            </router-link>
+            <b-badge pill :variant="movie.adult == true ? 'danger' : 'primary'" class="position-absolute badge-top-left">{{ movie.adult == true ? '+18' : 'Todo público' }}</b-badge>
+          </div>
+          <b-card-body>
+            <b-row>
+              <b-colxx xxs="12">
+                <h6 class="card-subtitle">{{movie.title}}</h6>
+              </b-colxx>
+            </b-row>
+          </b-card-body>
+        </b-card>
+
+      </div>
+    </div>
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      movies: [],
+      currentPage: 1,
+      moviesPerPage: 10
+    };
+  },
+  created() {
+    this.fetchMovies();
+  },
+  computed: {
+    displayedMovies() {
+      const startIndex = (this.currentPage - 1) * this.moviesPerPage;
+      const endIndex = startIndex + this.moviesPerPage;
+      return this.movies.slice(startIndex, endIndex);
     },
-    data() {
-      return {
-        isLoad: false,
-        apiBase: apiTMDB + "/movie/popular?api_key=" + apiKey,
-        displayMode: "image",
-        sort: {
-          column: "title",
-          label: "Product Name"
-        },
-        page: 1,
-        perPage: 4,
-        search: "",
-        from: 0,
-        to: 0,
-        total: 0,
-        lastPage: 0,
-        items: [],
-        selectedItems: []
-      };
-    },
-    methods: {
-      loadItems() {
-        this.isLoad = false;
-  
-        axios
-          .get(this.apiUrl)
-          .then(response => {
-            return response.data;
-          })
-          .then(res => {
-            this.total = res.total;
-            this.from = res.from;
-            this.to = res.to;
-            this.items = res.data.map(x => {
-              return {
-                ...x,
-                img: x.img.replace("/img/", "/img/products/")
-              };
-            });
-            this.perPage = res.per_page;
-            this.selectedItems = [];
-            this.lastPage = res.last_page;
-            this.isLoad = true;
-          });
-      },
-  
-      changeDisplayMode(displayType) {
-        this.displayMode = displayType;
-      },
-      changePageSize(perPage) {
-        this.page = 1;
-        this.perPage = perPage;
-      },
-      changeOrderBy(sort) {
-        this.sort = sort;
-      },
-      searchChange(val) {
-        this.search = val;
-        this.page = 1;
-      },
-  
-      selectAll(isToggle) {
-        if (this.selectedItems.length >= this.items.length) {
-          if (isToggle) this.selectedItems = [];
-        } else {
-          this.selectedItems = this.items.map(x => x.id);
-        }
-      },
-      keymap(event) {
-        switch (event.srcKey) {
-          case "select":
-            this.selectAll(false);
-            break;
-          case "undo":
-            this.selectedItems = [];
-            break;
-        }
-      },
-      getIndex(value, arr, prop) {
-        for (var i = 0; i < arr.length; i++) {
-          if (arr[i][prop] === value) {
-            return i;
-          }
-        }
-        return -1;
-      },
-      toggleItem(event, itemId) {
-        if (event.shiftKey && this.selectedItems.length > 0) {
-          let itemsForToggle = this.items;
-          var start = this.getIndex(itemId, itemsForToggle, "id");
-          var end = this.getIndex(
-            this.selectedItems[this.selectedItems.length - 1],
-            itemsForToggle,
-            "id"
-          );
-          itemsForToggle = itemsForToggle.slice(
-            Math.min(start, end),
-            Math.max(start, end) + 1
-          );
-          this.selectedItems.push(
-            ...itemsForToggle.map(item => {
-              return item.id;
-            })
-          );
-        } else {
-          if (this.selectedItems.includes(itemId)) {
-            this.selectedItems = this.selectedItems.filter(x => x !== itemId);
-          } else this.selectedItems.push(itemId);
-        }
-      },
-      handleContextMenu(vnode) {
-        if (!this.selectedItems.includes(vnode.key)) {
-          this.selectedItems = [vnode.key];
-        }
-      },
-      onContextMenuAction(action) {
-        console.log(
-          "context menu item clicked - " + action + ": ",
-          this.selectedItems
-        );
-      },
-      changePage(pageNum) {
-        this.page = pageNum;
-      }
-    },
-    computed: {
-      isSelectedAll() {
-        return this.selectedItems.length >= this.items.length;
-      },
-      isAnyItemSelected() {
-        return (
-          this.selectedItems.length > 0 &&
-          this.selectedItems.length < this.items.length
-        );
-      },
-      apiUrl() {
-        return `${this.apiBase}?sort=${this.sort.column}&page=${this.page}&per_page=${this.perPage}&search=${this.search}`;
-      }
-    },
-    watch: {
-      search() {
-        this.page = 1;
-      },
-      apiUrl() {
-        this.loadItems();
-      }
-    },
-    mounted() {
-      this.loadItems();
+    totalPages() {
+      return Math.ceil(this.movies.length / this.moviesPerPage);
     }
-  };
-  </script>
-  
+  },
+  methods: {
+    async fetchMovies() {
+      try {
+        const response = await fetch(
+            'https://api.themoviedb.org/3/movie/popular?api_key=5cf334e4000552b1b4724eb6ad837eb7'
+        );
+        const data = await response.json();
+        this.movies = data.results;
+        console.log(this.movies)
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+      }
+    },
+    getPosterUrl(posterPath) {
+      return `https://image.tmdb.org/t/p/w500${posterPath}`;
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    }
+  }
+};
+</script>
+
+<style>
+.movie-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 100px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  margin: 0 10px;
+  padding: 5px 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+</style>
