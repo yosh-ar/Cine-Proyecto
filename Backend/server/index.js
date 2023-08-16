@@ -13,6 +13,7 @@ class Server{
         this.paths = {
             auth: '/api/auth',
             users: '/api/users',
+            programin : '/api/programin',
         };
         
         // conexion
@@ -49,6 +50,7 @@ class Server{
     routes(){
         this.app.use(this.paths.auth, require('../routers/auth.routes'));
         this.app.use(this.paths.users, require('../routers/users/users.routes'));
+        this.app.use(this.paths.programin, require('../routers/programacion/programacion.routes'));
     }
     // se encarga de encender nuestro servidor
     listen(){

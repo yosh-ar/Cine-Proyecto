@@ -5,6 +5,7 @@ const {check} = require('express-validator');
 
 const {login,validarToken} = require('../controllers/auth.controller');
 const router = Router();
+const {validarCampos} = require('../middlewares');
 
 router.post('/login', [
     check('user', 'El usuario no es valido'),
