@@ -64,7 +64,7 @@
           </p>
           <p class="text-muted text-small mb-2">Generos</p>
           <p class="mb-3">
-            <b-badge variant="outline-secondary" class="mb-1 mr-1" pill v-for="genero in movieData.genres">
+            <b-badge variant="outline-secondary" class="mb-1 mr-1" pill v-for="genero in movieData.genres" :key="genero.id">
               {{ genero.name }}
             </b-badge>
           </p>
@@ -73,7 +73,7 @@
           <b-card-title>Compañias de producción</b-card-title>
           <div>
             <div class="row social-image-row gallery">
-              <b-colxx xxs="4" v-for="companie in movieData.production_companies">
+              <b-colxx xxs="4" v-for="companie in movieData.production_companies" :key="companie.id">
                 <div v-if="companie.logo_path">
                   <img
                       class="img-fluid"
@@ -107,8 +107,8 @@ import {
 import {
   detailsQuestionsData
 } from "../../../../data/questions";
-import {API_KEY, BASE_URL} from "@/constants/config";
-
+import {API_KEY, BASE_URL,BASE_IMG_URL} from "@/constants/config";
+import axios from "axios";
 export default {
   components: {
     'glide-component-thumbs': GlideComponentThumbs,
@@ -134,45 +134,25 @@ export default {
       isLoad: false,
       detailImages,
       detailThumbs,
-      tableItems: [{
-        id: 1,
-        first_name: 'Mark',
-        last_name: 'Otto',
-        username: '@mdo'
-      },
-        {
-          id: 2,
-          first_name: 'Jacob',
-          last_name: 'Thornton',
-          username: '@fat'
-        },
-        {
-          id: 3,
-          first_name: 'Lary',
-          last_name: 'the Bird',
-          username: '@twitter'
-        }
-      ],
+    
       commentWithLikesData,
       detailsQuestionsData,
     }
   },
   methods: {
-    detallePelicula(movieId) {
-      const url = `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`;
+    async detallePelicula(movieId) {
 
-      fetch(url)
-          .then(response => response.json())
-          .then(data => {
-            this.movieData = data;
-            console.log("Detalles de la película:", data);
-          })
-          .catch(error => {
-            console.error("Error al obtener los detalles de la película:", error);
-          });
+      try {
+        console.log('esta llegando')
+        const url = `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`;
+        const response = await axios.get(url);
+        this.movieData = response.data;
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+      }
     },
     getPosterUrl(posterPath) {
-      return `https://image.tmdb.org/t/p/w500${posterPath}`;
+      return `${BASE_IMG_URL}${posterPath}`;
     },
     inicializarHorariosSeleccionados() {
       this.horariosSeleccionados = this.salas.map(sala => new Array(sala.horarios.length).fill(''));

@@ -30,16 +30,21 @@
 </template>
 
 <script>
+import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../constants/config";
+import axios from "axios";
 export default {
   data() {
     return {
       movies: [],
       currentPage: 1,
-      moviesPerPage: 10
+      moviesPerPage: 10,
+      url : BASE_URL,
+      key : API_KEY,
+      img_url : BASE_IMG_URL
     };
   },
   created() {
-    this.fetchMovies();
+    this.getMovies();
   },
   computed: {
     displayedMovies() {
@@ -52,20 +57,16 @@ export default {
     }
   },
   methods: {
-    async fetchMovies() {
+    async getMovies() {
       try {
-        const response = await fetch(
-            'https://api.themoviedb.org/3/movie/popular?api_key=5cf334e4000552b1b4724eb6ad837eb7'
-        );
-        const data = await response.json();
-        this.movies = data.results;
-        console.log(this.movies)
+        const response = await axios.get(`${this.url}/movie/popular?api_key=${this.key}`);
+        this.movies = response.data.results;
       } catch (error) {
         console.error('Error al obtener los datos:', error);
       }
     },
     getPosterUrl(posterPath) {
-      return `https://image.tmdb.org/t/p/w500${posterPath}`;
+      return `${this.img_url}${posterPath}`;
     },
     prevPage() {
       if (this.currentPage > 1) {
