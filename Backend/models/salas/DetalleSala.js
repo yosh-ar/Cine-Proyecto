@@ -12,6 +12,9 @@ const DetalleSala = db.define('detalle_sala', {
     idmovie: {
         type: DataTypes.INTEGER,
     },
+    nombre_pelicula: {
+        type: DataTypes.STRING(500),
+    },
     fecha: {
         type:  DataTypes.DATEONLY,
     },
