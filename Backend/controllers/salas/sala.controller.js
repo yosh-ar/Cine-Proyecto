@@ -5,6 +5,7 @@ const {getPagination, getPagingData} = require('../../resources/pagination');
 const {customFormatterHora,customFormatter} = require('../../resources/dates');
 const sequelize = require('../../db/config');
 const Op = Sequelize.Op;
+const moment = require('moment');
 
 const indexProgramacion = async(req = request, res = response)=>{
     const {page = 1, limite =10, search = '', criterio = 'usuario', fecha_inicio ='', fecha_fin =''} = req.query;
@@ -195,8 +196,8 @@ const indexGetSalas = async (req, res) => {
 
 const validaProgramacion = async(req, res)=>{
     try {
-        const {idSala, fecha_recibe} = req.query;
-        
+        const {idSala, fecha_recibe, hora_entra} =  req.query;
+    
         const salas = await DetalleSala.findAll(
             {
                 where:{
@@ -208,67 +209,103 @@ const validaProgramacion = async(req, res)=>{
                 }
             }
         );
+        let newArr = ordenarHoras(salas);
+    
+        const horaIngresada = moment(hora_entra, 'HH:mm');
+
+        const horasConCuatroHorasSumadas = newArr.map(obj => {
+            return { hora: sumarCuatroHoras(obj.hora) };
+          });
+        
+        const intervaloEncajado = validarHoraEnIntervalo(horasConCuatroHorasSumadas, horaIngresada);
+
+        let bandera =  (intervaloEncajado) ? true : false 
+       
         res.status(200).json({
             msg : 'ok',
-            salas
+            bandera
         })
     } catch (error) {
+        console.log(error);
         return res.status(400).json({ msg : 'algo salio mal', error});
     }
 }
 
-const EntradaSalida = (horario_lectura, labora_entra, labora_salida)=>{
-    const entrada_mas30mins = parseFloat(labora_entra/3600).toString() + '.' +'31';
-    const entrada_menos30mins = parseFloat(labora_entra-3600)/3600 + '.' +'31';
-    const entra_despues = parseFloat(entrada_mas30mins)*3600;
-    const entra_antes = parseFloat(entrada_menos30mins)*3600;
-    
-    // console.log(entra_antes/3600, entra_despues/3600, horario_lectura/3600, labora_entra/3600);
 
-    const salida_mas30mins = parseFloat(labora_salida/3600).toString() + '.' +'31';
-    const salida_menos30mins = parseFloat(labora_salida-3600)/3600 + '.' +'31';
 
-    const sale_despues = parseFloat(salida_mas30mins)*3600;
-    const sale_antes = parseFloat(salida_menos30mins)*3600;
-   
-    if((horario_lectura == labora_entra ) || (horario_lectura <= entra_despues && horario_lectura >= entra_antes)){
-        return 'ENTRADA';
-    }
-    else if((horario_lectura == labora_salida ) || (horario_lectura <= sale_despues && horario_lectura >= sale_antes)){
-        return 'SALIDA';
-    }else{
-        return 'OTRO'
-    }
-    
-}
-const Hora= (dia_actual, E_S)=>{
-    let resp = 0;
-    if(E_S == 1){
-       resp = (dia_actual == 1) ? 6 :
-        (dia_actual == 2) ? 7 :
-        (dia_actual == 3) ? 8 :
-        (dia_actual == 4) ? 9 :
-        (dia_actual == 5) ? 10 :
-        (dia_actual == 6) ? 11 : 12;
-    }
-    else{
-        resp = (dia_actual == 1) ? 13 :
-        (dia_actual == 2) ? 14 :
-        (dia_actual == 3) ? 15:
-        (dia_actual == 4) ? 16:
-        (dia_actual == 5) ? 17 :
-        (dia_actual == 6) ? 18 : 19
-    }
-    return resp;
+function ordenarHoras(arr) {
+    const manana = "06:00"; // Hora de inicio de la mañana
+    const noche = "23:59"; // Hora de finalización de la noche
+  
+    arr.sort((obj1, obj2) => {
+      const hora1 = obj1.hora;
+      const hora2 = obj2.hora;
+  
+      if (hora1 >= manana && hora1 <= noche && hora2 >= manana && hora2 <= noche) {
+        return hora1.localeCompare(hora2);
+      } else if (hora1 < manana && hora2 >= manana && hora2 <= noche) {
+        return 1;
+      } else if (hora1 >= manana && hora1 <= noche && hora2 > noche) {
+        return -1;
+      } else {
+        return hora1.localeCompare(hora2);
+      }
+    });
+  
+    return arr;
 }
 
-
-
+function sumarCuatroHoras(hora) {
+    const momentHora = moment(hora, 'HH:mm').add(4, 'hours');
+    return momentHora.format('HH:mm');
+}
+function restartCuatroHoras(hora) {
+    const momentHora = moment(hora, 'HH:mm').subtract(4, 'hours');
+    return momentHora.format('HH:mm');
+}
+function validarHoraEnIntervalo(arr, hora) {
+    for (let i = 0; i < arr.length - 1; i++) {
+      const horaActual = arr[i].hora;
+      const horaSiguiente = arr[i + 1].hora;
+      const HoraNormal = hora.format('HH:mm');
+      const horaActualMasCua = hora.add(4, 'hours').format('HH:mm');
+        //--01:00      10          --05:00                                    14:00
+        //--9:30       10          --13:30                                    14:00
+        // console.log(hora.add(4, 'hours').format('HH:mm'),restartCuatroHoras(horaActual));
+      if (HoraNormal >= horaActual && horaActualMasCua <= restartCuatroHoras(horaSiguiente)) {
+        // console.log(i);
+        console.log(HoraNormal, horaActual, horaActualMasCua, restartCuatroHoras(horaSiguiente))
+        // console.log('primer if');
+        return {
+          intervalo: `${horaActual} - ${horaSiguiente}`,
+          horaIngresada: HoraNormal
+        };
+      }else if(horaActualMasCua<=restartCuatroHoras(horaActual)){
+        // console.log('segundo');
+        return {
+            intervalo: `es valido`,
+            horaIngresada: HoraNormal
+          };
+      }else if(HoraNormal >= horaActual && HoraNormal >= horaSiguiente){
+        // // console.log(HoraNormal, horaActual);
+        // console.log('tercero');
+        return {
+            intervalo: `es valido`,
+            horaIngresada: HoraNormal
+          };
+      }
+    //   console.log(horaActualMasCua,HoraNormal , horaActual,horaSiguiente)
+    }
+  
+    return null;
+  }
+  
 module.exports = {
     storeProgramin,
     indexProgramacion,
     anularProgramacion,
-    indexGetSalas,wiewProgramacion,validaProgramacion
+    indexGetSalas,wiewProgramacion,validaProgramacion,
+    validaProgramacion
 }
 
 

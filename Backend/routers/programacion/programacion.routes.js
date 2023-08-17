@@ -13,7 +13,12 @@ router.get('/get', [
     validarCampos
 ],indexProgramacion);
 router.get('/valida_programacion', [
-
+    check('idSala', 'Ingresa el número de sala').not().isEmpty(),
+    check('idSala').custom(salaIdExist),
+    check('fecha_recibe', 'Ingresa el fecha de sala').not().isEmpty(),
+    check('hora_entra', 'Ingresa la hora de sala').not().isEmpty(),
+    validarToken,
+    validarCampos
 ],validaProgramacion);
 router.get('/get', [
     validarToken,
