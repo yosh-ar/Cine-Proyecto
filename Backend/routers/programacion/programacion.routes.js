@@ -2,7 +2,8 @@ const {Router} = require('express');
 const {check} = require('express-validator');
 
 
-const {indexProgramacion,storeProgramin,anularProgramacion,indexGetSalas, wiewProgramacion,validaProgramacion} = require('../../controllers');
+const {indexProgramacion,storeProgramin,anularProgramacion,indexGetSalas,
+     wiewProgramacion,validaProgramacion,salaMoviesDate} = require('../../controllers');
 const {  programacionIdExist,
     salaIdExist,userIdExist} = require('../../helpers');
 const {validarCampos,validarToken} = require('../../middlewares');
@@ -20,6 +21,13 @@ router.get('/valida_programacion', [
     validarToken,
     validarCampos
 ],validaProgramacion);
+router.get('/salas_movie', [
+    check('idmovie', 'Ingresa la pelicula').not().isEmpty(),
+    check('fecha_inicio', 'Ingresa la fecha inicio').not().isEmpty(),
+    check('fecha_fin', 'Ingresa la fecha final').not().isEmpty(),
+    validarToken,
+    validarCampos
+],salaMoviesDate);
 router.get('/get', [
     validarToken,
     validarCampos
