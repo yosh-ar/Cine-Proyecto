@@ -90,6 +90,12 @@ const router = new VueRouter({
                         component: () =>
                             import("./views/app/pages/cine/Programacion/ViewProgramacion.vue"),
                       },
+                      {
+                        path: "select_acientos/:idmovie/:idsala/:idhora/:idprogramacion",
+                        name: "select_acientos",
+                        component: () =>
+                            import("./views/app/pages/cine/SeleccionAcientos.vue"),
+                      },
                          
                       {
                         path: "new_programacion",

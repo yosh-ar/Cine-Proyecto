@@ -86,7 +86,7 @@
                   <b-form-invalid-feedback
                     >Debe ingresar la fecha</b-form-invalid-feedback
                   >
-                  <datepicker v-model="fecha"  type="datetime"></datepicker>
+                  <datepicker  v-model="fecha"  type="datetime"></datepicker>
                  
                   <b-form-invalid-feedback
                     >Debe ingresar la fecha</b-form-invalid-feedback
@@ -219,8 +219,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
 
   
   const { required } = require("vuelidate/lib/validators");
-  let nit = (value) => helpers.nitIsValid(value);
-  let correo = (value) => helpers.correo(value);
+  
   export default {
     components: {
       vSelect,
@@ -265,6 +264,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
         items: [],
         selectedItems: [],
         api: apiUrl,
+        activador : false,
       };
     },
     mixins: [validationMixin],
@@ -304,13 +304,22 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
     
     },
     methods: {
-      async SelectSala() {
-    let me = this;
-    this.dataSelect1 = [];
-    const response = await axios.get(apiUrl + "/api/programin/get_salas",{headers: { "x-token": this.$store.state.token}});
-    me.dataSelect1 = response.data.data;
+   
+     async validaSala() {
+      let me = this;
+      console.log(this.customHora(this.fecha));
+      const response = await axios.get(apiUrl + "/api/programin/valida_programacion?idSala="+this.SalaModel.id+'&fecha_recibe='+ this.customFormatter(this.fecha)+'&hora_entra='+this.customHora(this.fecha),
+      {headers: { "x-token": this.$store.state.token}});
+      this.activador = response.data.bandera;
 
-  },
+    },
+    async SelectSala() {
+      let me = this;
+      this.dataSelect1 = [];
+      const response = await axios.get(apiUrl + "/api/programin/get_salas",{headers: { "x-token": this.$store.state.token}});
+      me.dataSelect1 = response.data.data;
+
+    },
 
       storeProgramin() {
         const me = this;
@@ -374,7 +383,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
         this.movieExist = null;
       },
       // FUNCIONES PARA MONEDAS
-      formatQuetzales(amount) {
+      les(amount) {
         let num = parseFloat(amount),
           formatted;
         formatted = num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
@@ -400,10 +409,10 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
         return moment(date).format("YYYY-MM-DD");
       },
       customFormatterHora(date) {
-        return moment(date).format("YYYY-MM-DD h:mm:ss");
+        return moment(date).format("YYYY-MM-DD HH:mm:ss");
       },
       customHora(date) {
-        return moment(date).format("h:mm:ss");
+        return  moment(date).format('HH:mm:ss a');
       },
       formatoPresentacion(date) {
         return moment(date)
@@ -416,15 +425,16 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
         let me = this;
         me.arrayDetalle.splice(index, 1);
       },
-      agregarDetalle() {
-        
-        const idmovie = this.idpelicula;
+      async agregarDetalle() {
+          const idmovie = this.idpelicula;
         const idsala = this.SalaModel;
         const fecha = this.customFormatter(this.fecha);
         const fecha_hora = this.customFormatterHora(this.fecha);
         const hora = this.customHora(this.fecha);
-        // console.log(fecha,this.idsala);
-        if(idsala == null || idmovie <0  ||fecha == 'Invalid date'){
+        // console.log(fecha_hora);
+        
+       
+        if(idsala == null || idmovie <=0  ||fecha == 'Invalid date'){
           this.$notify(
             "error filled",
             "Vacío",
@@ -433,6 +443,17 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
           );
           return;
         }else{
+          await this.validaSala();
+           if(!this.activador){
+          this.$notify(
+            "error filled",
+            "Vacío",
+            "La " +idsala.nombre+" Ya se encuentra reservada para esta fecha y horario",
+            { duration: 3000, permanent: false }
+          );
+          return;
+        }
+        else{
           this.arrayDetalle.push({
             nombre : this.movieExist.title,
             sala :idsala.nombre,
@@ -443,6 +464,8 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
             hora,
           })
         }
+        }
+        
         this.limpiarVariables();
        
       },

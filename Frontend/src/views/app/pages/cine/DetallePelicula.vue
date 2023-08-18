@@ -19,28 +19,57 @@
           <b-tabs card no-fade>
             <b-tab title="Horarios" active>
               <b-row>
+                
                 <b-colxx>
                   <div class="horarios-pelicula">
+                    <div class="row">
+                            <div class="col-md-6">
+                              
+                              <div class="form-group">
+                                  <label class="form-control-label">Fecha </label>
+                                  <datepicker :bootstrap-styling="true"  @input="getSalasDisponiblesDate(fecha_inicio, fecha_fin),getHorariosDispo(movieID)"  placeholder="Seleccione fecha" :language="es" :format="customFormatter" v-model="fecha_inicio"></datepicker>
+                              </div>
+                            </div>
+                            <!-- <div class="col-md-6">
+                              <div class="form-group">
+                                  <label class="form-control-label">Fecha fin intervalo</label>
+                                  <datepicker :bootstrap-styling="true" @input="getSalasDisponiblesDate(fecha_inicio, fecha_fin)"  ref="myDatepicker" placeholder="Seleccione fecha" :disabledDates="disabledDates" :language="es" :format="customFormatter" v-model="fecha_fin"></datepicker>
+                              </div>
+                            </div> -->
+                          </div>
                     <h2 class="titulo">Selección de Horarios</h2>
                     <div class="salas">
-                      <div v-for="(sala, salaIndex) in salas" :key="salaIndex" class="sala">
-                        <h3 class="sala-titulo">Sala {{ salaIndex + 1 }}</h3>
+                      <div v-for="(sala) in arraySalasDips" :key="sala.id" class="sala">
+                        <h3 class="sala-titulo">{{ sala.sala.nombre}}</h3>
                         <ul class="lista-horarios">
+                           
                           <li
-                              v-for="(horario, horarioIndex) in sala.horarios"
-                              :key="horarioIndex"
-                              @click="seleccionarHorario(salaIndex, horarioIndex)"
-                              :class="{
-                                  'horario-seleccionado': horario === horariosSeleccionados[salaIndex][horarioIndex],
-                                  'horario-desactivado': horariosSeleccionados[salaIndex][horarioIndex] !== ''
-                                }"
+                            
+                              v-for="(horario) in obtenerHorarios(sala.sala.id)"
+                              :key="horario.id"
                               >
-                            {{ horario }}
+                            {{ (horario.hora) }}
+
+                            <router-link
+                              :to="{
+                                name: 'select_acientos',
+                                params: { idmovie: movieID, idsala: sala.sala.id, idhora:horario.hora, idprogramacion: horario.id },
+                              }"
+                            >
+                              <b-button
+                                squared
+                                class="mb-2"
+                                size="sm"
+                                variant="outline-success"
+                              >
+                                <i :class="'simple-icon-eye'" />
+                              </b-button>
+                            </router-link>
                           </li>
                         </ul>
-                        <p class="horario-seleccionado-text">
+                        <!-- <p class="horario-seleccionado-text">
                           Horario seleccionado: {{ horariosSeleccionados[salaIndex] }}
-                        </p>
+                        </p> -->
                       </div>
                     </div>
                   </div>
@@ -96,7 +125,9 @@ import GlideComponentThumbs from '../../../../components/Carousel/GlideComponent
 import CommentWithLikes from '../../../../containers/pages/CommentWithLikes'
 import QuestionAnswer from '../../../../containers/pages/QuestionAnswer'
 import GalleryDetail from '../../../../containers/pages/GalleryDetail'
-
+import moment from "moment";
+import Datepicker from 'vuejs-datepicker';
+import {en, es} from 'vuejs-datepicker/dist/locale';
 import {
   detailImages,
   detailThumbs
@@ -107,17 +138,32 @@ import {
 import {
   detailsQuestionsData
 } from "../../../../data/questions";
-import {API_KEY, BASE_URL,BASE_IMG_URL} from "@/constants/config";
+import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
 import axios from "axios";
+
+import { mapGetters } from "vuex";
 export default {
   components: {
     'glide-component-thumbs': GlideComponentThumbs,
     'comment-with-likes': CommentWithLikes,
     'question-answer': QuestionAnswer,
     'gallery-detail': GalleryDetail,
+    datepicker: Datepicker,
   },
   data() {
     return {
+      es :es,
+      disabledDates: {
+            to: '',
+        },
+      api : apiUrl,
+      headers: { "x-token": this.$store.state.token,
+                      'Content-Type': 'application/json', 
+                      'Access-Control-Allow-Origin':'*'
+          },
+      httpOptions: {
+        headers: { "x-token": this.$store.state.token}
+      }, 
       salas: [
         {
           horarios: ['10:00 AM', '2:00 PM', '6:00 PM', '10:00 PM']
@@ -134,16 +180,57 @@ export default {
       isLoad: false,
       detailImages,
       detailThumbs,
-    
+      fecha_inicio : new Date(),
+      fecha_fin : new Date(),
       commentWithLikesData,
       detailsQuestionsData,
+      arraySalasDips:[],
+      movieID: 0,
+      arrayHorariosDisponibles: []
     }
   },
   methods: {
+  
+    updateDisableDates(){
+        let me = this;
+        if(new Date(me.customFormatter(me.fecha_inicio)).getTime() > new Date(me.customFormatter(me.fecha_fin))){
+            me.$refs.myDatepicker.clearDate();
+            me.fecha_fin = '';
+        }
+        me.disabledDates.to = new Date(me.fecha_inicio);
+      },
+      customHora(date) {
+        return  moment.utc(date).add(24, 'hours').format('HH:mm:ss a');
+      },
+    customFormatter(date) {
+        return moment(date).format("YYYY-MM-DD");
+    },
+    async getSalasDisponiblesDate(){
+    
+      const response = await axios.get(apiUrl + "/api/programin/salas_movie?idmovie="+this.movieID+'&fecha_inicio='+ this.customFormatter(this.fecha_inicio)+'&fecha_fin='+this.customFormatter(this.fecha_inicio),
+      {headers: { "x-token": this.$store.state.token}});
+
+      this.arraySalasDips = response.data.salasDispo;
+      // console.log(this.arraySalasDips)
+
+
+      
+    },
+      obtenerHorarios(salaId) {
+      
+      return this.arrayHorariosDisponibles.filter(horario => horario.salaId === salaId);
+    },
+    async getHorariosDispo(id){
+    
+      const response = await axios.get(apiUrl + "/api/programin/salas_horarios?idmovie="+id+'&fecha_inicio='+ this.customFormatter(this.fecha_inicio)+'&fecha_fin='+this.customFormatter(this.fecha_inicio),
+      {headers: { "x-token": this.$store.state.token}});
+      this.arrayHorariosDisponibles = response.data.newArr;
+      // console.log(this.arrayHorariosDisponibles);
+      
+    },
     async detallePelicula(movieId) {
 
       try {
-        console.log('esta llegando')
         const url = `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`;
         const response = await axios.get(url);
         this.movieData = response.data;
@@ -158,8 +245,9 @@ export default {
       this.horariosSeleccionados = this.salas.map(sala => new Array(sala.horarios.length).fill(''));
     },
     seleccionarHorario(salaIndex, horarioIndex) {
-      const horarioSeleccionado = this.salas[salaIndex].horarios[horarioIndex];
-      this.$set(this.horariosSeleccionados[salaIndex], horarioIndex, horarioSeleccionado);
+      // console.log('dieron click')
+      // const horarioSeleccionado = this.salas[salaIndex].horarios[horarioIndex];
+      // this.$set(this.horariosSeleccionados[salaIndex], horarioIndex, horarioSeleccionado);
     }
   },
   mounted() {
@@ -167,8 +255,10 @@ export default {
     setTimeout(() => {
       this.isLoad = true
     }, 50)
-
-    this.detallePelicula(this.$route.params.id)
+    this.movieID=this.$route.params.id;
+    this.detallePelicula(this.$route.params.id) 
+    this.getSalasDisponiblesDate(this.$route.params.id) 
+    this.getHorariosDispo(this.$route.params.id) 
   }
 }
 </script>

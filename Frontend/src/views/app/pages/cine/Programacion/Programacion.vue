@@ -276,116 +276,7 @@ export default {
     customFormatter(date) {
       return moment(date).format('YYYY-MM-DD');
     },
-     openModal(model) {
-      switch (model) {
-        case "save": {
-          this.$v.$reset();
-         
-          this.form1.cierre_caja = "";
-          this.form1.codigo_deposito = "";
-          this.form1.monto_deposito = "";
-          break;
-        }
-      }
-    },
-     openModal1(model) {
-      switch (model) {
-        case "save": {
-          this.$v.$reset();
-          this.egreso = "";
-          this.razon = "";
-          break;
-        }
-      }
-    },
-    validaCierre(){
-      // return;
-        this.$v.$touch();
-      const me = this;
-      const usuario = this.currentUser.id;
-      let user = parseInt(localStorage.getItem("usuario"));
-      const valor =  parseFloat(this.converMaskToNumberxd(me.form1.cierre_caja));
-      // console.log(valor);
-      // return;
-      if(valor>0){
-        axios.put(apiUrl + "/api/arqueo/fin_caja", {
-            'cierre_final' : this.cierreFinal,
-            'id':this.$store.state.caja,
-            'fin_caja'    : valor,
-            'monto_deposito' : parseFloat( this.converMaskToNumberxd(this.form1.monto_deposito)),
-            'codigo_deposito' : this.form1.codigo_deposito,
-            'usuario' : user
-        },{headers: this.headers}).then((response) => {
-          this.$store.commit("clearCaja");
-          this.getArqueoValidate()
-          me.$notify("primary filled", "Guardado", `Cierre de caja finalizado`, {
-            duration: 7000,
-            permanent: false,
-          });
-          me.closeModal();
-        }).catch((error) => {
-          this.errorMessage = error.message;
-          console.error("Error!", error);
-        });
-      }else{
-        me.$notify(
-            "info",
-            "Alerta",
-            "Ingrese el monto de caja",
-            { duration: 5000, permanent: false }
-          );
-      }
-    },  
-    validaEgreso(){
-        this.$v.$touch();
-      const me = this;
-      const usuario = this.currentUser.id;
-      let user = parseInt(localStorage.getItem("usuario"));
-      const valor =  parseFloat(this.converMaskToNumberxd(me.egreso));
-      const btnRegistrar = document.querySelector('#registrar');
-      btnRegistrar.disabled = true;
-
-      if(valor>0 && me.razon !=''){
-        axios.post(apiUrl + "/api/arqueo/egresos/store", {
-            'id':this.$store.state.caja,
-            'monto'    : valor,
-            'razon' : me.razon,
-            'usuario' : user
-        },{headers: this.headers}).then((response) => {
-          me.$notify("primary filled", "Guardado", `Egreso de caja finalizado`, {
-            duration: 7000,
-            permanent: false,
-          });
-          btnRegistrar.disabled = false;
-          me.closeModal1();
-        }).catch((error) => {
-          this.errorMessage = error.message;
-          console.error("Error!", error);
-        });
-      }else{
-        me.$notify(
-            "info",
-            "Alerta",
-            "Ingrese el monto y razon de egreso",
-            { duration: 5000, permanent: false }
-          );
-      }
-    },  
-    closeModal(model) {
-          this.$v.$reset();
-          this.$refs["modalSave"].hide();
-          this.form1.cierre_caja = "";
-          this.form1.codigo_deposito = "";
-          this.form1.monto_deposito = "";
-        
-    },
-    closeModal1(model) {
-          this.$v.$reset();
-          this.$refs["modalEgreso"].hide();
-          this.egreso = "";
-          this.razon = "";
-        
-    },
+ 
   
 
     onState() {
@@ -410,31 +301,8 @@ export default {
           });
       
     },
-    EnviarPEDIDO() {
-      //desactivar tipo
-      const me = this;
-        axios
-          .put(apiUrl + "/api/ventas/entraga_pedido", {
-            id: this.id_venta,
-          },{headers: this.headers})
-          .then((response) => {
-            me.$notify(
-              "warning",
-              "Desactivado",
-              "Venta  a sido entregada con éxito",
-              { duration: 3000, permanent: false }
-            );
-            me.$refs.vuetable.refresh();
-          })
-          .catch((error) => {
-            this.errorMessage = error.message;
-            console.error("There was an error!", error);
-          });
-      
-    },
+
     setData(data) {
-      // console.log(data)
-      // this.form.state = data.persona.estado_persona;
       this.id_venta = data.id;
     },
 
