@@ -247,7 +247,7 @@ const salaMoviesDate = async (req, res) => {
                     model: Sala
                 }
             ],
-            group: ['fecha']
+            group: ['fecha','salaId']
         });
 
         res.status(200).json({
@@ -259,7 +259,43 @@ const salaMoviesDate = async (req, res) => {
     }
 }
 
+const listadoHorarios = async (req, res) => {
+    const {idmovie, fecha_inicio, fecha_fin} =  req.query;
+    try{
+        const salasDispo = await DetalleSala.findAll({
+            where: {
+                fecha:{[Op.between]: [fecha_inicio, fecha_fin]},
+                idmovie:idmovie
+            },
+            include: [
+                {
+                    model: Sala
+                }
+            ],
+        });
+        let newArr = ordenarHoras(salasDispo);
+        // console.log(newArr);
+        res.status(200).json({
+            newArr
+        })
+    }catch (error) {
+        console.log(error);
+        return res.status(400).json({ msg : 'algo salio mal', error});
+    }
+}
 
+const getSalabyId = async(req, res)=>{
+    const {id} =  req.query;
+    try {
+        const salas = await Sala.findByPk(id);
+        res.status(200).json({
+            msg : 'ok',
+            data : salas
+        })
+    } catch (error) {
+        return res.status(400).json({ msg : 'algo salio mal', error});
+    }
+}
 
 
 
@@ -271,8 +307,8 @@ module.exports = {
     storeProgramin,
     indexProgramacion,
     anularProgramacion,
-    indexGetSalas,wiewProgramacion,validaProgramacion,
-    validaProgramacion,salaMoviesDate
+    indexGetSalas,wiewProgramacion,validaProgramacion,  
+      validaProgramacion,salaMoviesDate,listadoHorarios,getSalabyId
 }
 
 

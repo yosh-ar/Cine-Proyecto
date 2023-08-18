@@ -13,6 +13,9 @@ const Sala = db.define('salas', {
     capacidad: {
         type: DataTypes.INTEGER,
     },
+    cantidad_filas: {
+        type: DataTypes.INTEGER,
+    },
     estado: {
         type: DataTypes.BOOLEAN,
         defaultValue : true

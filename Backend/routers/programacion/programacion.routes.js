@@ -2,7 +2,7 @@ const {Router} = require('express');
 const {check} = require('express-validator');
 
 
-const {indexProgramacion,storeProgramin,anularProgramacion,indexGetSalas,
+const {indexProgramacion,storeProgramin,anularProgramacion,indexGetSalas,listadoHorarios,getSalabyId,
      wiewProgramacion,validaProgramacion,salaMoviesDate} = require('../../controllers');
 const {  programacionIdExist,
     salaIdExist,userIdExist} = require('../../helpers');
@@ -13,12 +13,18 @@ router.get('/get', [
     validarToken,
     validarCampos
 ],indexProgramacion);
+router.get('/get_salabyid', [
+    check('id', 'Ingresa el número de sala').not().isEmpty(),
+    check('id').custom(salaIdExist),
+    validarToken,
+    validarCampos
+],getSalabyId);
 router.get('/valida_programacion', [
     check('idSala', 'Ingresa el número de sala').not().isEmpty(),
     check('idSala').custom(salaIdExist),
     check('fecha_recibe', 'Ingresa el fecha de sala').not().isEmpty(),
     check('hora_entra', 'Ingresa la hora de sala').not().isEmpty(),
-    validarToken,
+    // validarToken,
     validarCampos
 ],validaProgramacion);
 router.get('/salas_movie', [
@@ -28,6 +34,13 @@ router.get('/salas_movie', [
     validarToken,
     validarCampos
 ],salaMoviesDate);
+router.get('/salas_horarios', [
+    check('idmovie', 'Ingresa la pelicula').not().isEmpty(),
+    check('fecha_inicio', 'Ingresa la fecha inicio').not().isEmpty(),
+    check('fecha_fin', 'Ingresa la fecha final').not().isEmpty(),
+    validarToken,
+    validarCampos
+],listadoHorarios);
 router.get('/get', [
     validarToken,
     validarCampos
