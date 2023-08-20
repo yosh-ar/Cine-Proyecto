@@ -18,7 +18,6 @@
               <div class="total-amount">
                 Total a Pagar: {{ formatQuetzales(TotalAPagar) }}
               </div>
-              <button @click="confirmSelection">Confirmar Selección</button>
             </div>
             <div v-if="showSummary" class="confirmation-summary">
               <h2>Resumen de la Película</h2>
@@ -30,6 +29,10 @@
           </div>
           </b-form>
           <template #modal-footer="{}">
+             <div class="selection-summary">
+              
+              <button @click="storeVenta">Confirmar Selección</button>
+            </div>
               <b-button type="submit" hidden variant="primary" @click="onValidate('save')"
               >Guardar</b-button
               >
@@ -92,6 +95,17 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
     props: ['movieTitle'],
     data() {
       return {
+        disabledDates: {
+                    to: '',
+                },
+        
+        headers: { "x-token": this.$store.state.token,
+                      'Content-Type': 'application/json', 
+                      'Access-Control-Allow-Origin':'*'
+          },
+          httpOptions: {
+            headers: { "x-token": this.$store.state.token}
+          }, 
         showSummary: false,
         moviePrice: 35,
         TotalAPagar: 0,
@@ -103,18 +117,30 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
         salanombre: null,
         horario: null,
         salaId: null,
-        arrayReservados: []
+        arrayReservados: [],
+        detalleSalaId  : 0,
+        arrayDetalle : [],
       };
     },
     created() {
       // Generar disposición inicial de los asientos
  
       this.getByReservados(this.$route.params.idprogramacion); 
+      this.detalleSalaId = this.$route.params.idprogramacion;
     },
     mounted(){
       this.detallePelicula(this.$route.params.idmovie,this.$route.params.idsala,this.$route.params.idhora) 
     },  
     methods: {
+      
+      updateDisableDates(){
+          let me = this;
+          // if(new Date(me.customFormatter(new Date())).getTime() > new Date(me.customFormatter(new Date()))){
+          //     me.$refs.myDatepicker.clearDate();
+          //     // me.fecha_fin = '';
+          // }
+          me.disabledDates.to = this.sumarDias(new Date());
+      },
       confirmSelection() {
   
         this.showSummary = true;
@@ -205,7 +231,49 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
         });
         this.showSummary = true;
         console.log('Asientos seleccionados:', selectedSeats);
-      }
+      },
+      limpiarArray(detalle,detalleSalaId, moviePrice){
+        const arregloObjetos = detalle.map(cadena => {
+          const letra = cadena.charAt(0);
+          const numero = parseInt(cadena.slice(1));
+          
+          return { fila: letra, asiento: numero, detalleSalaId, precio : moviePrice };
+        });
+        return arregloObjetos;
+      },
+      storeVenta(){
+        const me = this;
+        let usuario = parseInt(localStorage.getItem("usuario"));  
+        let newArr = this.limpiarArray(this.arrayDetalle,parseInt(this.detalleSalaId), this.moviePrice);
+        if(newArr.length <=0){
+          return this.$notify(
+            "error filled",
+            "ERROR",
+            "Debes seleccionar al menos un asiento",
+            { duration: 4000, permanent: false }
+          );
+        }
+        axios
+          .post(apiUrl + "/api/ventas/store", {
+            usuario,
+            'total_boletos' :this.totalAcientos,
+            'total':this.TotalAPagar,
+            'detalleSalaId' :parseInt( this.detalleSalaId ),
+            data :  newArr,
+          },{headers: this.headers})
+          .then((response) => {
+            me.$notify("primary filled", "Guardado", `Venta realizada con éxito`, {
+              duration: 7000,
+              permanent: false,
+            });
+            
+            this.$router.push({ name: "movie" });
+          })
+          .catch((error) => {
+            this.errorMessage = error.message;
+            console.error("Error!", error);
+          });
+      },  
     },
     computed : {
       selectedSeatsText() {
@@ -220,7 +288,7 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
             }
           }
         }
-
+      this.arrayDetalle = selectedSeatsArray;
       return selectedSeatsArray.join(', ');
       },
     }

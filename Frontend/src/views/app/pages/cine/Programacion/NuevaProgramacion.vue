@@ -86,24 +86,39 @@
                   <b-form-invalid-feedback
                     >Debe ingresar la fecha</b-form-invalid-feedback
                   >
-                  <datepicker  v-model="fecha"  type="datetime"></datepicker>
-                 
+                  <datepicker :bootstrap-styling="true" ref="myDatepicker"  :selected="updateDisableDates()" placeholder="Seleccione fecha" :disabledDates="disabledDates" :language="es" :format="customFormatter" v-model="fecha"></datepicker>
+                  
                   <b-form-invalid-feedback
                     >Debe ingresar la fecha</b-form-invalid-feedback
                   >
                 </b-form-group>
+             
               </b-colxx>
               <b-colxx>
+                <br />
+                <br />
                 <b-form-group>
-                  
-              <b-button-group>
-                  <b-button
-                    @click="agregarDetalle()"
-                    size="sm"
-                    variant="outline-success"
-                    ><i :class="'simple-icon-check'"
-                  /></b-button>
-                </b-button-group>
+              
+              <b-form-invalid-feedback
+                >Debe ingresar la hora</b-form-invalid-feedback
+              >
+              <b-form-input
+              type="time" id="appt" name="appt" min="09:00" max="18:00" v-model="hora_movie"
+              ></b-form-input>
+
+              <b-form-invalid-feedback
+                >Debe ingresar la fecha</b-form-invalid-feedback
+              >
+            </b-form-group>
+                <b-form-group>
+                    <b-button-group>
+                      <b-button
+                        @click="agregarDetalle()"
+                        size="sm"
+                        variant="outline-success"
+                        ><i :class="'simple-icon-check'"
+                      /></b-button>
+                    </b-button-group>
                 </b-form-group>
               </b-colxx>
             </b-row>
@@ -211,10 +226,10 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
   import MaskedInput from "vue-text-mask";
   import moment from "moment";
   import { mapGetters } from "vuex";
-  // import Datepicker from "vuejs-datepicker";
+  import DatePiker from "vuejs-datepicker";
   // import DatetimePicker from "vuejs-datepicker";
 
-  import DatePicker from 'vue2-datepicker';
+  // import DatePicker from 'vue2-datepicker';
   import 'vue2-datepicker/index.css';
 
   
@@ -226,17 +241,22 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
       vuetable: Vuetable,
       MaskedInput,
       "vuetable-pagination-bootstrap": VuetablePaginationBootstrap,
-      datepicker  : DatePicker,
+      // datepicker  : DatePicker,
+      datepicker  : DatePiker,
       tab: Tab,
       switches: Switches,
     },
     data() {
       return {
+        hora_movie: null,
         dataSelect1: [],  
         SalaModel: null,
       url : BASE_URL,
       key : API_KEY,
       img_url : BASE_IMG_URL,
+      disabledDates: {
+                    to: '',
+                },
 
         headers: { "x-token": this.$store.state.token,
                       'Content-Type': 'application/json', 
@@ -248,7 +268,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
      
         es: es,
         arrayDetalle: [],
-        fecha:null,
+        fecha:new Date(),
         movieExist: "",
         arrayMovies: [],
         idpelicula: 0,
@@ -270,6 +290,9 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
     mixins: [validationMixin],
   
     validations: {
+      hora_movie: {
+        required
+      },
       SalaModel : {
         required
       },
@@ -304,14 +327,20 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
     
     },
     methods: {
-   
+      sumarDias(fecha){
+        fecha.setDate(fecha.getDate() -1);
+        return fecha;
+      },
+
+      updateDisableDates(){
+          let me = this;
+          me.disabledDates.to = this.sumarDias(new Date());
+      },
      async validaSala() {
       let me = this;
-      console.log(this.customHora(this.fecha));
       const response = await axios.get(apiUrl + "/api/programin/valida_programacion?idSala="+this.SalaModel.id+'&fecha_recibe='+ this.customFormatter(this.fecha)+'&hora_entra='+this.customHora(this.fecha),
       {headers: { "x-token": this.$store.state.token}});
       this.activador = response.data.bandera;
-
     },
     async SelectSala() {
       let me = this;
@@ -381,6 +410,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
         this.SalaModel = null;
         this.fecha = null;
         this.movieExist = null;
+        this.hora_movie = null;
       },
       // FUNCIONES PARA MONEDAS
       les(amount) {
@@ -430,8 +460,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
         const idsala = this.SalaModel;
         const fecha = this.customFormatter(this.fecha);
         const fecha_hora = this.customFormatterHora(this.fecha);
-        const hora = this.customHora(this.fecha);
-        // console.log(fecha_hora);
+    
         
        
         if(idsala == null || idmovie <=0  ||fecha == 'Invalid date'){
@@ -461,7 +490,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
             fecha_hora,
             salaId: idsala.id,
             idmovie,
-            hora,
+            hora: this.hora_movie,
           })
         }
         }

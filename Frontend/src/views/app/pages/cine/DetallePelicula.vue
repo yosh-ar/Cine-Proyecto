@@ -27,7 +27,7 @@
                               
                               <div class="form-group">
                                   <label class="form-control-label">Fecha </label>
-                                  <datepicker :bootstrap-styling="true"  @input="getSalasDisponiblesDate(fecha_inicio, fecha_fin),getHorariosDispo(movieID)"  placeholder="Seleccione fecha" :language="es" :format="customFormatter" v-model="fecha_inicio"></datepicker>
+                                  <datepicker :bootstrap-styling="true"  :disabledDates="disabledDates"  :selected="updateDisableDates()" @input="getSalasDisponiblesDate(fecha_inicio, fecha_fin),getHorariosDispo(movieID)"  placeholder="Seleccione fecha" :language="es" :format="customFormatter" v-model="fecha_inicio"></datepicker>
                               </div>
                             </div>
                             <!-- <div class="col-md-6">
@@ -51,12 +51,14 @@
                             {{ (horario.hora) }}
 
                             <router-link
+                         
                               :to="{
                                 name: 'select_acientos',
                                 params: { idmovie: movieID, idsala: sala.sala.id, idhora:horario.hora, idprogramacion: horario.id },
                               }"
                             >
                               <b-button
+                              v-if="validaHora(horario.hora)"
                                 squared
                                 class="mb-2"
                                 size="sm"
@@ -152,6 +154,7 @@ export default {
   },
   data() {
     return {
+      
       es :es,
       disabledDates: {
             to: '',
@@ -190,18 +193,43 @@ export default {
     }
   },
   methods: {
-  
+    convertirHoraEnMinutos(horaString) {
+      const [horas, minutos] = horaString.split(':');
+      return parseInt(horas) * 60 + parseInt(minutos);
+    },
+    validaHora(horaMovie){
+      
+      const horaActual = new Date();
+
+      const horas = horaActual.getHours();
+      const minutos = horaActual.getMinutes();
+      const segundos = horaActual.getSeconds();
+
+      const horasFormateadas = horas < 10 ? '0' + horas : horas;
+      const minutosFormateados = minutos < 10 ? '0' + minutos : minutos;
+      const segundosFormateados = segundos < 10 ? '0' + segundos : segundos;
+
+      const horaActualFormateada = `${horasFormateadas}:${minutosFormateados}:${segundosFormateados}`;
+
+      const hour = this.convertirHoraEnMinutos(horaActualFormateada);
+      const horaM = this.convertirHoraEnMinutos(horaMovie);
+      return  (hour > horaM) ? false : true;
+      
+    },
+    sumarDias(fecha){
+      fecha.setDate(fecha.getDate() -1);
+      return fecha;
+    },
+
     updateDisableDates(){
         let me = this;
-        if(new Date(me.customFormatter(me.fecha_inicio)).getTime() > new Date(me.customFormatter(me.fecha_fin))){
-            me.$refs.myDatepicker.clearDate();
-            me.fecha_fin = '';
-        }
-        me.disabledDates.to = new Date(me.fecha_inicio);
-      },
-      customHora(date) {
-        return  moment.utc(date).add(24, 'hours').format('HH:mm:ss a');
-      },
+
+        me.disabledDates.to = this.sumarDias(new Date());
+    },
+  
+    customHora(date) {
+      return  moment.utc(date).add(24, 'hours').format('HH:mm:ss');
+    },
     customFormatter(date) {
         return moment(date).format("YYYY-MM-DD");
     },
@@ -244,11 +272,7 @@ export default {
     inicializarHorariosSeleccionados() {
       this.horariosSeleccionados = this.salas.map(sala => new Array(sala.horarios.length).fill(''));
     },
-    seleccionarHorario(salaIndex, horarioIndex) {
-      // console.log('dieron click')
-      // const horarioSeleccionado = this.salas[salaIndex].horarios[horarioIndex];
-      // this.$set(this.horariosSeleccionados[salaIndex], horarioIndex, horarioSeleccionado);
-    }
+
   },
   mounted() {
     this.inicializarHorariosSeleccionados();
