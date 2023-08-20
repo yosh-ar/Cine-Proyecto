@@ -32,4 +32,4 @@ DetalleVenta.belongsTo(Venta,{
 Venta.hasMany(DetalleVenta)
 
 
-module.exports = Venta;
+module.exports = DetalleVenta;

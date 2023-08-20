@@ -20,29 +20,31 @@ const storeVenta  =  async(req = request, res = response)=>{
         })
         const r = (registro == null) ? 1 : parseInt(registro.no_venta) +1;
 
-
         const venta = new Venta({transaction: t});
         venta.no_venta = r;
         venta.fecha_venta = customFormatter(new Date());
         venta.hora = customFormatterHora(new Date());
-        venta.userId= resto.userId;
+        venta.userId= resto.usuario;
         venta.detalleSalaId= resto.detalleSalaId;
         venta.total_boletos= resto.total_boletos;
         venta.total_venta = resto.total;
         await venta.save();
 
+
         for await(det of resto.data){
             const Detalle = new DetalleVenta({ transaction: t});
             Detalle.ventaId = venta.id;
             Detalle.fila = det.fila;
-            Detalle.no_asiento = det.no_asiento;
+            Detalle.precio = det.precio;
+            Detalle.no_asiento = det.asiento;
             await Detalle.save();
+
 
             const reserva = new DetalleReserva({ transaction: t});
             reserva.ventaId = venta.id;
-            reserva.detalleSalaId = venta.detalleSalaId;
+            reserva.detalleSalaId = det.detalleSalaId;
             reserva.fila = det.fila;
-            reserva.no_asiento = det.no_asiento;
+            reserva.no_asiento = det.asiento;
             await reserva.save();
         }
 

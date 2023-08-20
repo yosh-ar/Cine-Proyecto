@@ -24,7 +24,7 @@ router.get('/valida_programacion', [
     check('idSala').custom(salaIdExist),
     check('fecha_recibe', 'Ingresa el fecha de sala').not().isEmpty(),
     check('hora_entra', 'Ingresa la hora de sala').not().isEmpty(),
-    // validarToken,
+    validarToken,
     validarCampos
 ],validaProgramacion);
 router.get('/salas_movie', [

@@ -10,6 +10,7 @@ const programacionIdExist = async(id)=>{
 
 const DetalleSalaIdExist = async(id)=>{
     const value = await DetalleSala.findByPk(id);
+    // console.log(id, value)
     if(!value){
         throw new Error(`El id  no existe en nuestros registros`);
     }

@@ -22,5 +22,5 @@ router.post('/store', [
     check('detalleSalaId').custom(DetalleSalaIdExist),
     validarToken,
     validarCampos
-],getReservaMovie);
+],storeVenta);
 module.exports = router;

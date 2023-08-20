@@ -1,8 +1,7 @@
 const { DataTypes, Sequelize} = require('sequelize');
 const db = require('../../db/config');
-const TipoSala = require('./TipoSala');
 
-const Sala = db.define('salas', {
+const TipoSala = db.define('tipo_salas', {
     id:{
         type: DataTypes.INTEGER,
         primaryKey : true,
@@ -11,11 +10,8 @@ const Sala = db.define('salas', {
     nombre: {
         type: DataTypes.STRING(50),
     },
-    capacidad: {
-        type: DataTypes.INTEGER,
-    },
-    cantidad_filas: {
-        type: DataTypes.INTEGER,
+    valor: {
+        type: DataTypes.DECIMAL(10,2),
     },
     estado: {
         type: DataTypes.BOOLEAN,
@@ -24,12 +20,4 @@ const Sala = db.define('salas', {
 });
 
 
-
-Sala.belongsTo(TipoSala,{
-    foreignKey: {
-    allowNull: false
-}});
-
-TipoSala.hasMany(Sala)
-
-module.exports = Sala;
+module.exports = TipoSala;
