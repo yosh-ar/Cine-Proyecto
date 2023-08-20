@@ -8,6 +8,13 @@ const programacionIdExist = async(id)=>{
     }
 }
 
+const DetalleSalaIdExist = async(id)=>{
+    const value = await DetalleSala.findByPk(id);
+    if(!value){
+        throw new Error(`El id  no existe en nuestros registros`);
+    }
+}
+
 const salaIdExist = async(id)=>{
     const value = await Sala.findByPk(id);
     if(!value){
@@ -17,5 +24,5 @@ const salaIdExist = async(id)=>{
 
 module.exports= {
     programacionIdExist,
-    salaIdExist
+    salaIdExist,DetalleSalaIdExist
 }

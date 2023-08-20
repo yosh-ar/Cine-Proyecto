@@ -1,6 +1,7 @@
 const { DataTypes} = require('sequelize');
 const db = require('../../db/config');
 const User = require('../User/User');
+const SalaProgramacion = require('../../models/salas/DetalleSala');
 
 const Venta = db.define('ventas', {
     id:{
@@ -14,8 +15,8 @@ const Venta = db.define('ventas', {
     fecha_venta: {
         type: DataTypes.DATEONLY,
     },
-    fecha_hora: {
-        type: DataTypes.DATE,
+    hora: {
+        type: DataTypes.TIME,
     },
 
     total_boletos : {
@@ -35,8 +36,13 @@ Venta.belongsTo(User,{
     foreignKey: {
     allowNull: false
 }});
+Venta.belongsTo(SalaProgramacion,{
+    foreignKey: {
+    allowNull: false
+}});
 
 User.hasMany(Venta)
+SalaProgramacion.hasMany(Venta)
 
 
 module.exports = Venta;

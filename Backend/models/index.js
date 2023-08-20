@@ -6,10 +6,17 @@ const DetalleSala = require('./salas/DetalleSala');
 const Programacion = require('./salas/Programacion');
 
 
+const Venta = require('./ventas/Venta');
+const DetalleVenta = require('./ventas/detalle_venta');
+const DetalleReserva = require('./ventas/detalle_reservas');
+
 module.exports = {
     Rol,
     User,
     Sala,
     Programacion,
-    DetalleSala
+    DetalleSala,
+    Venta,
+    DetalleVenta,
+    DetalleReserva
 }
