@@ -22,6 +22,7 @@
     "username": "Nombre de Usuario"
   },
   "menu": {
+    "movie" : "Peliculas",
     "home": "Inicio",
     "principal": "Principal",
     "users": "Usuarios",
@@ -29,12 +30,13 @@
     "app": "Inicio",
     "dashboards": "Tableros",
     "default": "Defecto",
-   
+    "programin" : "Programacion",
     "acceso": "Acceso",
     "analytics": "Analítica",
     "ecommerce": "Comercio electrónico",
     "content": "Contenido",
     "pages": "Páginas",
+    "movies": "Cine",
     "data-list": "Lista Datos",
     "thumb-list": "Lista Pulgares",
     "image-list": "Lista Imagen",

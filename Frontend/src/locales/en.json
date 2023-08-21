@@ -7,6 +7,7 @@
     "detail": "You are not authorized to view the page you are trying to access."
   },
   "user": {
+    "movie" : "Peliculas",
     "login-title": "Login",
     "register": "Register",
     "forgot-password": "Forgot Password",
@@ -22,6 +23,7 @@
     "username": "Username"
   },
   "menu": {
+    "movie" : "Peliculas",
     "principal": "Principal",
     "users": "Usuarios",
   
@@ -29,7 +31,7 @@
     "app": "Home",
     "dashboards": "Dashboards",
     "default": "Default",
-    
+    "programin" : "Programacion",
     "analytics": "Analytics",
     "ecommerce": "Ecommerce",
     "content": "Content",

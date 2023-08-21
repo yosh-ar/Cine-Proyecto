@@ -12,7 +12,8 @@ const router = new VueRouter({
   // routes,
   routes:
     parseInt(localStorage.getItem("rol")) == 1
-      ? [
+      ? 
+      [
           {
             path: "/",
             redirect: `/user/login`,
@@ -36,16 +37,15 @@ const router = new VueRouter({
                 component: () => import("./views/app/blank-page"),
               },
            
-              // EMPLEADOS
               {
-                path: "empleados",
+                path: "users",
                 component: () =>
                   import(
                     /* webpackChunkName: "dashboards" */ "./views/app/pages"
                   ),
                 children: [
                   {
-                    path: "empleados",
+                    path: "users",
                     component: () =>
                       import(
                         /* webpackChunkName: "dashboards" */ "./views/app/pages"
@@ -54,8 +54,8 @@ const router = new VueRouter({
     
                      
                       {
-                        path: "usuarios",
-                        name: "usuarios",
+                        path: "users",
+                        name: "users",
                         component: () =>
                           import("./views/app/pages/empleados/Usuario"),
                       },
@@ -63,8 +63,64 @@ const router = new VueRouter({
                   },
                 ],
               },
-              // PROVEEDORES
-              // Todo esto se modifico
+              {
+                path: "movies",
+                component: () =>
+                  import(
+                    /* webpackChunkName: "dashboards" */ "./views/app/pages"
+                  ),
+                children: [
+                  {
+                    path: "movies",
+                    component: () =>
+                      import(
+                        /* webpackChunkName: "dashboards" */ "./views/app/pages"
+                      ),
+                    children: [
+
+                      {
+                        path: "programin",
+                        name: "programin",
+                        component: () =>
+                          import("./views/app/pages/cine/Programacion/Programacion.vue"),
+                      },
+                      {
+                        path: "view_programacion/:id",
+                        name: "view_programacion",
+                        component: () =>
+                            import("./views/app/pages/cine/Programacion/ViewProgramacion.vue"),
+                      },
+                      {
+                        path: "select_acientos/:idmovie/:idsala/:idhora/:idprogramacion",
+                        name: "select_acientos",
+                        component: () =>
+                            import("./views/app/pages/cine/SeleccionAcientos.vue"),
+                      },
+                         
+                      {
+                        path: "new_programacion",
+                        name: "new_programacion",
+                        component: () =>
+                          import(
+                            "./views/app/pages/cine/Programacion//NuevaProgramacion.vue"
+                          ),
+                      },
+                      {
+                        path: "movie",
+                        name: "movie",
+                        component: () =>
+                          import("./views/app/pages/cine/Peliculas.vue"),
+                      },
+                      {
+                        path: "detalle/:id",
+                        name: "detalle",
+                        component: () =>
+                            import("./views/app/pages/cine/DetallePelicula.vue"),
+                      },
+                    ],
+                  },
+                ],
+              },
          
             ],
           },
@@ -193,7 +249,8 @@ const router = new VueRouter({
             component: () =>
               import(/* webpackChunkName: "error" */ "./views/Error"),
           },
-        ],
+        ]
+        ,
   mode: "history",
 });
 router.beforeEach(AuthGuard);
