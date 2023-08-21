@@ -121,6 +121,37 @@ const router = new VueRouter({
                   },
                 ],
               },
+              {
+                path: "ventas",
+                component: () =>
+                  import(
+                    /* webpackChunkName: "dashboards" */ "./views/app/pages"
+                  ),
+                /* component: () =>
+            import("./views/app/pages"), */
+                children: [
+                  {
+                    path: "registro",
+                    component: () =>
+                      import(
+                        /* webpackChunkName: "dashboards" */ "./views/app/pages"
+                      ),
+                    children: [
+                      {
+                        path: "listado-ventas",
+                        name: "listado-ventas",
+                        component: () =>
+                          import("./views/app/pages/cine/ventas/Venta"),
+                      },
+                    ],
+                  },
+                  // {
+                  //   path: "venta-rapida",
+                  //   component: () =>
+                  //         import( "./views/app/pages/ventas/VentaRapida")
+                  // },
+                ],
+              },
          
             ],
           },

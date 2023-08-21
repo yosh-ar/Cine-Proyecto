@@ -61,6 +61,7 @@ export default {
       try {
         const response = await axios.get(`${this.url}/movie/popular?api_key=${this.key}`);
         this.movies = response.data.results;
+        // console.log(this.movies)
       } catch (error) {
         console.error('Error al obtener los datos:', error);
       }

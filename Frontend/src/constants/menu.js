@@ -53,6 +53,25 @@ parseInt(localStorage.getItem("rol")) == 1 ?[
 
   ]
 },
-
+{
+  id: "ventas",
+  icon: "iconsminds-shopping-cart",
+  label: "menu.ventas",
+  subs: [
+  {
+    icon: "simple-icon-layers",
+    label: "menu.registro",
+    subs: [
+     
+      {
+        icon: "iconsminds-checkout",
+        label: "menu.listado-ventas",
+        to: `${adminRoot}/ventas/registro/listado-ventas`
+      },
+    ]
+  },
+  
+  ]
+},
 
 ]: [] ;

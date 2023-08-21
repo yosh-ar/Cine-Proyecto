@@ -22,11 +22,13 @@
     "username": "Nombre de Usuario"
   },
   "menu": {
+    "registro" : "Registro",
     "movie" : "Peliculas",
     "home": "Inicio",
     "principal": "Principal",
     "users": "Usuarios",
-   
+    "ventas" : "Ventas",
+    "listado-ventas" : "Listado Ventas",
     "app": "Inicio",
     "dashboards": "Tableros",
     "default": "Defecto",
