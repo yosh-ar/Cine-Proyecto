@@ -21,47 +21,70 @@ function ordenarHoras(arr) {
     return arr;
 }
 
-function sumarCuatroHoras(hora) {
-    const momentHora = moment(hora, 'HH:mm').add(4, 'hours');
-    return momentHora.format('HH:mm');
-}
-function restartCuatroHoras(hora) {
-    const momentHora = moment(hora, 'HH:mm').subtract(4, 'hours');
-    return momentHora.format('HH:mm');
+
+function calcularHoras(hora, operacion) {
+  // console.log(hora, operacion);
+  const [horas, minutos, segundos] = hora.split(':');
+
+  let horasNumericas = parseInt(horas);
+  const minutosNumericos = parseInt(minutos);
+  const segundosNumericos = parseInt(segundos);
+
+  horasNumericas += operacion;
+
+  while (horasNumericas < 0) {
+    horasNumericas += 24;
+  }
+
+  horasNumericas %= 24;
+
+  const horasFormateadas = horasNumericas < 10 ? '0' + horasNumericas : horasNumericas;
+  const minutosFormateados = minutosNumericos < 10 ? '0' + minutosNumericos : minutosNumericos;
+  const segundosFormateados = segundosNumericos < 10 ? '0' + segundosNumericos : segundosNumericos;
+
+  return `${horasFormateadas}:${minutosFormateados}:${segundosFormateados}`;
+
+
 }
 function validarHoraEnIntervalo(arr, hora) {
-    for (let i = 0; i < arr.length - 1; i++) {
-      const horaActual = arr[i].hora;
-      const horaSiguiente = arr[i + 1].hora;
-      const HoraNormal = hora.format('HH:mm');
-      const horaActualMasCua = hora.add(4, 'hours').format('HH:mm');
-        //--01:00      10          --05:00                                    14:00
-        //--9:30       10          --13:30                                    14:00
-        // console.log(hora.add(4, 'hours').format('HH:mm'),restartCuatroHoras(horaActual));
-      if (HoraNormal >= horaActual && horaActualMasCua <= restartCuatroHoras(horaSiguiente)) {
-        // console.log(i);
-        console.log(HoraNormal, horaActual, horaActualMasCua, restartCuatroHoras(horaSiguiente))
-        // console.log('primer if');
-        return {
-          intervalo: `${horaActual} - ${horaSiguiente}`,
-          horaIngresada: HoraNormal
-        };
-      }else if(horaActualMasCua<=restartCuatroHoras(horaActual)){
-        // console.log('segundo');
-        return {
-            intervalo: `es valido`,
-            horaIngresada: HoraNormal
-          };
-      }else if(HoraNormal >= horaActual && HoraNormal >= horaSiguiente){
-        // // console.log(HoraNormal, horaActual);
-        // console.log('tercero');
-        return {
-            intervalo: `es valido`,
-            horaIngresada: HoraNormal
-          };
+  //true significa que si puede programar la pelicula
+  const horaEntrada = hora + ':00';
+    if(arr.length==1){
+      const cuatroHorasDReserva =calcularHoras(arr[arr.length-1].hora, 4);
+      const cuatroHorasAreserva = calcularHoras(arr[arr.length-1].hora, -4);
+
+      if(horaEntrada <=cuatroHorasAreserva){
+        // console.log(`La hora ${horaEntrada} encaja antes de ${cuatroHorasAreserva}.`);
+        return true; 
+      }else{
+        if(cuatroHorasDReserva == '00:00:00'){
+          return false
+        }else if(horaEntrada >=cuatroHorasDReserva){
+          // console.log(`La hora ${horaEntrada} encaja despues de ${cuatroHorasDReserva}.`);
+         return true;
+        }
       }
-    //   console.log(horaActualMasCua,HoraNormal , horaActual,horaSiguiente)
+    }else{
+      for (let i = 0; i < arr.length - 1; i++) {
+        const horaActual = arr[i].hora;
+        const horaSiguiente = arr[i + 1].hora;
+        const horaActualMasCuatro = calcularHoras(horaActual,4);
+        const horaActualMenosCuatro = calcularHoras(horaActual, -4);
+        const horaSiguienteCuatroAntes = calcularHoras(horaSiguiente, -4)
+          if(i==0 && horaEntrada <= horaActualMenosCuatro){
+            // console.log(`La hora ${horaEntrada} encaja antes de ${horaActualMenosCuatro}.`);
+            return true;
+          }
+          else if (horaEntrada >= horaActualMasCuatro && horaEntrada <=horaSiguienteCuatroAntes) {
+            // console.log(`La hora ${horaEntrada} encaja antes de ${horaSiguienteCuatroAntes}. y despues de ${horaActualMasCuatro}`);
+            return true;
+          }else if(i == arr.length - 1 && horaEntrada >=horaActualMasCuatro){
+            // console.log(`La hora ${horaEntrada} encaja despues de ${horaActualMasCuatro}.`);
+            return true;
+          }
+      }
     }
+   
   
     return null;
 }
@@ -69,6 +92,6 @@ function validarHoraEnIntervalo(arr, hora) {
 
 module.exports= {
     ordenarHoras,
-    sumarCuatroHoras,
+    // sumarCuatroHoras,
     validarHoraEnIntervalo
 }

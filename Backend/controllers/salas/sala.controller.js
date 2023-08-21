@@ -1,5 +1,5 @@
 const {response, request } = require('express');
-const {DetalleSala, Programacion, User, Sala} = require('../../models');
+const {DetalleSala, Programacion, User, Sala, TipoSala} = require('../../models');
 const Sequelize = require('sequelize');
 const {getPagination, getPagingData} = require('../../resources/pagination');
 const {customFormatterHora,customFormatter} = require('../../resources/dates');
@@ -211,12 +211,13 @@ const validaProgramacion = async(req, res)=>{
                 }
             }
         );
+        // console.log(salas);
         let bandera ;
         if(salas.length > 0) {
                 let newArr = ordenarHoras(salas);
-                const horaIngresada = moment(hora_entra, 'HH:mm');
+                const horaIngresada = hora_entra
                 const horasConCuatroHorasSumadas = newArr.map(obj => {
-                    return { hora: sumarCuatroHoras(obj.hora) };
+                    return { hora: obj.hora };
                 });
                 const intervaloEncajado = validarHoraEnIntervalo(horasConCuatroHorasSumadas, horaIngresada);
 
@@ -287,7 +288,7 @@ const listadoHorarios = async (req, res) => {
 const getSalabyId = async(req, res)=>{
     const {id} =  req.query;
     try {
-        const salas = await Sala.findByPk(id);
+        const salas = await Sala.findByPk(id, { include : [{   model : TipoSala}]});
         res.status(200).json({
             msg : 'ok',
             data : salas
