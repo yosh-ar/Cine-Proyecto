@@ -62,11 +62,23 @@
                 <br />
                 <b-form-group >
                   <v-select
+                  @input="getHorarios"
                     v-model.trim="$v.SalaModel.$model"
                     :state="!$v.SalaModel.$error"
                     :options="dataSelect1"
                     label="nombre"
-                  />
+                  >
+                      <template v-slot:option="option">
+                      {{
+                        `${option.nombre} :: ${option.tipo_sala.nombre} `
+                      }}
+                    </template>
+                    <template slot="selected-option" slot-scope="option">
+                      {{
+                            `${option.nombre} :: ${option.tipo_sala.nombre} `
+                      }}
+                    </template>
+                  </v-select>
                   <div
                     :class="{
                       'invalid-feedback': true,
@@ -86,7 +98,7 @@
                   <b-form-invalid-feedback
                     >Debe ingresar la fecha</b-form-invalid-feedback
                   >
-                  <datepicker :bootstrap-styling="true" ref="myDatepicker"  :selected="updateDisableDates()" placeholder="Seleccione fecha" :disabledDates="disabledDates" :language="es" :format="customFormatter" v-model="fecha"></datepicker>
+                  <datepicker :bootstrap-styling="true" ref="myDatepicker"  :selected="updateDisableDates()" @input="getHorarios()" placeholder="Seleccione fecha" :disabledDates="disabledDates" :language="es" :format="customFormatter" v-model="fecha"></datepicker>
                   
                   <b-form-invalid-feedback
                     >Debe ingresar la fecha</b-form-invalid-feedback
@@ -112,12 +124,14 @@
             </b-form-group>
                 <b-form-group>
                     <b-button-group>
+                
                       <b-button
                         @click="agregarDetalle()"
                         size="sm"
                         variant="outline-success"
                         ><i :class="'simple-icon-check'"
                       /></b-button>
+                    
                     </b-button-group>
                 </b-form-group>
               </b-colxx>
@@ -131,7 +145,42 @@
     
   
           <br />
+          <!--  -->
+          <b-card>
+            <h3 class="textolead">Programación previa</h3>
+            <br />
+            <b-card no-body>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <th>Pelicula</th>
+                    <th>Sala</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                  </thead>
+                  <tbody v-if="arrayHorarios.length">
+                    <tr
+                      v-for="(detalle, index) in arrayHorarios"
+                      :key="index"
+                    >
+                      
+                      <td v-text="detalle.nombre_pelicula"></td>
+                      <td v-text="detalle.sala.nombre"></td>
+                      <td v-text="detalle.fecha"></td>
+                      <td v-text="detalle.hora"></td>
   
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </b-card>
+   
+            <br />
+            <!-- FOOTER DE DETALLES -->
+        
+          </b-card>
+          <!--  -->
+          <br>
           <b-card>
             <h3 class="textolead">Programación asignada</h3>
             <br />
@@ -248,6 +297,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
     },
     data() {
       return {
+        arrayHorarios:[],
         hora_movie: null,
         dataSelect1: [],  
         SalaModel: null,
@@ -336,9 +386,18 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
           let me = this;
           me.disabledDates.to = this.sumarDias(new Date());
       },
+     async getHorarios() {
+      let me = this;
+      // console.log(this.idpelicula);
+      const response = await axios.get(apiUrl + "/api/programin/get_movie_sala?idsala="+this.SalaModel.id+'&fecha='+ this.customFormatter(this.fecha)+'&idmovie='+this.idpelicula,
+      {headers: { "x-token": this.$store.state.token}});
+      // console.log(response.data.data)
+      this.arrayHorarios = response.data.data;
+    },
      async validaSala() {
       let me = this;
-      const response = await axios.get(apiUrl + "/api/programin/valida_programacion?idSala="+this.SalaModel.id+'&fecha_recibe='+ this.customFormatter(this.fecha)+'&hora_entra='+this.customHora(this.fecha),
+      // console.log(this.hora_movie);
+      const response = await axios.get(apiUrl + "/api/programin/valida_programacion?idSala="+this.SalaModel.id+'&fecha_recibe='+ this.customFormatter(this.fecha)+'&hora_entra='+this.hora_movie,
       {headers: { "x-token": this.$store.state.token}});
       this.activador = response.data.bandera;
     },
@@ -347,6 +406,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
       this.dataSelect1 = [];
       const response = await axios.get(apiUrl + "/api/programin/get_salas",{headers: { "x-token": this.$store.state.token}});
       me.dataSelect1 = response.data.data;
+      // console.log(me.dataSelect1);
 
     },
 
@@ -393,6 +453,7 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
       },
       // Función que recuperar el cliente buscado
       getDatosMovie(val1) {
+        // console.log(val1);
         let me = this;
         me.loading = true;
         if (val1 == null || val1 == "") {
@@ -408,9 +469,10 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
         const me = this;
         this.idpelicula = -1;
         this.SalaModel = null;
-        this.fecha = null;
+        this.fecha = new Date();
         this.movieExist = null;
         this.hora_movie = null;
+        this.arrayHorarios = [];
       },
       // FUNCIONES PARA MONEDAS
       les(amount) {
@@ -492,10 +554,11 @@ import { BASE_URL,API_KEY,BASE_IMG_URL } from "../../../../../constants/config";
             idmovie,
             hora: this.hora_movie,
           })
+          this.limpiarVariables();
         }
         }
         
-        this.limpiarVariables();
+     
        
       },
   

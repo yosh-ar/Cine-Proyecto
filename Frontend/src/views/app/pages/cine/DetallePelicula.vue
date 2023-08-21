@@ -40,7 +40,7 @@
                     <h2 class="titulo">Selección de Horarios</h2>
                     <div class="salas">
                       <div v-for="(sala) in arraySalasDips" :key="sala.id" class="sala">
-                        <h3 class="sala-titulo">{{ sala.sala.nombre}}</h3>
+                        <h3 class="sala-titulo">{{ sala.sala.nombre}} {{ sala.sala.tipo_sala.nombre }}</h3>
                         <ul class="lista-horarios">
                            
                           <li
@@ -239,7 +239,7 @@ export default {
       {headers: { "x-token": this.$store.state.token}});
 
       this.arraySalasDips = response.data.salasDispo;
-      // console.log(this.arraySalasDips)
+      console.log(this.arraySalasDips)
 
 
       

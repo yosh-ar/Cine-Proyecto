@@ -107,7 +107,7 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
             headers: { "x-token": this.$store.state.token}
           }, 
         showSummary: false,
-        moviePrice: 35,
+        moviePrice: 0,
         TotalAPagar: 0,
         totalAcientos : 0,
         totalRows: 11, // cantidad de filas
@@ -161,10 +161,11 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
     
           const response = await axios.get(apiUrl + "/api/programin/get_salabyid?id="+salaId,
           {headers: { "x-token": this.$store.state.token}});
-
+        // console.log(response.data);
         this.totalRows = response.data.data.capacidad/response.data.data.cantidad_filas;
         this.seatsPerRow = response.data.data.cantidad_filas;
-        this.salanombre = response.data.data.nombre;
+        this.salanombre = response.data.data.nombre + ' '+ response.data.data.tipo_sala.nombre;
+        this.moviePrice = parseInt(response.data.data.tipo_sala.valor);
         this.generateSeats();
 
         },
