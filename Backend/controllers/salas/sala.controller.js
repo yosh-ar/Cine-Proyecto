@@ -186,7 +186,7 @@ const wiewProgramacion = async ( req = request, res = response) => {
 
 const indexGetSalas = async (req, res) => {
     try {
-        const salas = await Sala.findAll({where:{estado : true}});
+        const salas = await Sala.findAll({where:{estado : true}, include : [{model : TipoSala}]});
         res.status(200).json({
             msg : 'ok',
             data : salas
@@ -245,7 +245,7 @@ const salaMoviesDate = async (req, res) => {
             },
             include: [
                 {
-                    model: Sala
+                    model: Sala, include : [ { model  : TipoSala}]
                 }
             ],
             group: ['fecha','salaId']
@@ -298,6 +298,33 @@ const getSalabyId = async(req, res)=>{
     }
 }
 
+const getProgamacionSalaMovie= async(req, res)=>{
+    const {idsala, idmovie, fecha} =  req.query;
+    try {
+        // console.log('llega', fecha, idsala, idmovie)
+        const salas = await DetalleSala.findAll({ 
+            where :{
+                fecha: {
+                    [Op.gte]: fecha
+                  },
+                idmovie : idmovie,
+                salaId : idsala
+            },
+            include : [
+                {
+                    model : Sala,
+                }
+            ]
+        });
+        // console.log(salas);
+        res.status(200).json({
+            msg : 'ok',
+            data : salas
+        })
+    } catch (error) {
+        return res.status(400).json({ msg : 'algo salio mal', error});
+    }
+}
 
 
 
@@ -309,7 +336,8 @@ module.exports = {
     indexProgramacion,
     anularProgramacion,
     indexGetSalas,wiewProgramacion,validaProgramacion,  
-      validaProgramacion,salaMoviesDate,listadoHorarios,getSalabyId
+      validaProgramacion,salaMoviesDate,listadoHorarios,getSalabyId,
+      getProgamacionSalaMovie
 }
 
 

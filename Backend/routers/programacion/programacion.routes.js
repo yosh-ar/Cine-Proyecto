@@ -2,7 +2,7 @@ const {Router} = require('express');
 const {check} = require('express-validator');
 
 
-const {indexProgramacion,storeProgramin,anularProgramacion,indexGetSalas,listadoHorarios,getSalabyId,
+const {indexProgramacion,storeProgramin,anularProgramacion,indexGetSalas,listadoHorarios,getSalabyId,getProgamacionSalaMovie,
      wiewProgramacion,validaProgramacion,salaMoviesDate} = require('../../controllers');
 const {  programacionIdExist,
     salaIdExist,userIdExist} = require('../../helpers');
@@ -10,9 +10,17 @@ const {validarCampos,validarToken} = require('../../middlewares');
 
 const router = Router();
 router.get('/get', [
+
     validarToken,
     validarCampos
 ],indexProgramacion);
+router.get('/get_movie_sala', [
+    check('idsala', 'Ingresa el id de sala').not().isEmpty(),
+    check('idmovie', 'Ingresa el id de movie').not().isEmpty(),
+    check('fecha', 'Ingresa la fecha').not().isEmpty(),
+    validarToken,
+    validarCampos
+],getProgamacionSalaMovie);
 router.get('/get_salabyid', [
     check('id', 'Ingresa el número de sala').not().isEmpty(),
     check('id').custom(salaIdExist),
