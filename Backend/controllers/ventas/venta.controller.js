@@ -7,6 +7,8 @@ const sequelize = require('../../db/config');
 const Op = Sequelize.Op;
 const moment = require('moment');
 
+const {enviarCorreo} = require('../../helpers/mail/envio.mail');
+
 const storeVenta  =  async(req = request, res = response)=>{
     const t = await sequelize.transaction();
     try{
@@ -49,6 +51,8 @@ const storeVenta  =  async(req = request, res = response)=>{
         }
 
         await t.commit();
+
+        enviarCorreo(resto);
 
         res.status(200).json({
             msg: 'success'
