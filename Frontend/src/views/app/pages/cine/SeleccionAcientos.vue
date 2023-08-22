@@ -30,9 +30,23 @@
           </b-form>
           <template #modal-footer="{}">
              <div class="selection-summary">
+              <b-form-group label="Correo" >
+                <b-form-input        
+                :class="{ 'form-group--error': $v.email.$error }"
+                v-model.trim="email"
+                type="email"
+                class="form-control"
+                placeholder="Correo electrónico"
+                @input="$v.email.$touch()"
+              ></b-form-input>
+              <div v-if="$v.email.$error">
+                    <div class="alert alert-warning" v-if="!$v.email.correo">Correo invalido.</div>
+              </div>
+            </b-form-group>
+            
               
-              <button @click="storeVenta">Confirmar Selección</button>
-            </div>
+          </div>
+          <button @click="storeVenta">Confirmar Selección</button>
               <b-button type="submit" hidden variant="primary" @click="onValidate('save')"
               >Guardar</b-button
               >
@@ -91,10 +105,18 @@
   import axios from "axios";
 
 import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
+import {helpers} from '../../../../helpers/helpers-validate';
+import "vue-select/dist/vue-select.css";
+import { validationMixin } from "vuelidate";
+
+let correo = (value) => helpers.correo(value)
+
+
   export default {
     props: ['movieTitle'],
     data() {
       return {
+        arrayString : '',
         disabledDates: {
                     to: '',
                 },
@@ -120,8 +142,18 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
         arrayReservados: [],
         detalleSalaId  : 0,
         arrayDetalle : [],
+        email : "",
       };
     },
+    mixins: [validationMixin],
+  validations: {
+    
+     
+      email: {
+          correo
+      
+    },
+  },
     created() {
       // Generar disposición inicial de los asientos
  
@@ -154,6 +186,7 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
     
         const response = await axios.get(apiUrl + "/api/ventas/get_reservas?id="+id,
         {headers: { "x-token": this.$store.state.token}});
+        // console.log(response.data)
         this.arrayReservados = response.data.reservas;
 
       },
@@ -175,7 +208,7 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
         const url = `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`;
         const response = await axios.get(url);
         this.movieData = response.data;
-        
+
         this.horario =hora;
         this.salaId = sala;
         this.getSalaById(this.salaId)
@@ -246,17 +279,25 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
         const me = this;
         let usuario = parseInt(localStorage.getItem("usuario"));  
         let newArr = this.limpiarArray(this.arrayDetalle,parseInt(this.detalleSalaId), this.moviePrice);
-        if(newArr.length <=0){
+        if(newArr.length <=0 || this.email == ''){
           return this.$notify(
             "error filled",
             "ERROR",
-            "Debes seleccionar al menos un asiento",
+            "Debes seleccionar al menos un asiento y ingrese un correo",
             { duration: 4000, permanent: false }
           );
         }
+        // console.log(this.$route.params.idhora,  this.salanombre, this.movieData.title , this.arrayString);
+        // return ;
         axios
           .post(apiUrl + "/api/ventas/store", {
+            'sala' : this.salanombre,
+            'movie' : this.movieData.title,
+            'asientos' : this.arrayString,
+            'hora'  : this.$route.params.idhora,
+            'fecha' : this.$route.params.fecha,
             usuario,
+            email : this.email,
             'total_boletos' :this.totalAcientos,
             'total':this.TotalAPagar,
             'detalleSalaId' :parseInt( this.detalleSalaId ),
@@ -290,6 +331,7 @@ import {API_KEY, BASE_URL,BASE_IMG_URL,apiUrl} from "@/constants/config";
           }
         }
       this.arrayDetalle = selectedSeatsArray;
+      this.arrayString = selectedSeatsArray.join(', ');
       return selectedSeatsArray.join(', ');
       },
     }

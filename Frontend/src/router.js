@@ -91,7 +91,7 @@ const router = new VueRouter({
                             import("./views/app/pages/cine/Programacion/ViewProgramacion.vue"),
                       },
                       {
-                        path: "select_acientos/:idmovie/:idsala/:idhora/:idprogramacion",
+                        path: "select_acientos/:idmovie/:idsala/:idhora/:idprogramacion/:fecha",
                         name: "select_acientos",
                         component: () =>
                             import("./views/app/pages/cine/SeleccionAcientos.vue"),

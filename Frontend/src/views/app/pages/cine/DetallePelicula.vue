@@ -54,7 +54,7 @@
                          
                               :to="{
                                 name: 'select_acientos',
-                                params: { idmovie: movieID, idsala: sala.sala.id, idhora:horario.hora, idprogramacion: horario.id },
+                                params: { idmovie: movieID, idsala: sala.sala.id, idhora:horario.hora, idprogramacion: horario.id , fecha:horario.fecha},
                               }"
                             >
                               <b-button
