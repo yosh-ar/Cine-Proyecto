@@ -18,7 +18,8 @@ const enviarCorreo = async (data) => {
         to: data.email,
         subject: 'Prueba BB',
         html: `
-        <html>
+      <!DOCTYPE html>
+          <html>
           <head>
             <style>
               body {
@@ -32,6 +33,7 @@ const enviarCorreo = async (data) => {
                 border-radius: 10px;
                 padding: 20px;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                text-align: center; /* Centro de contenido */
               }
               .header {
                 background-color: #007bff;
@@ -39,6 +41,9 @@ const enviarCorreo = async (data) => {
                 text-align: center;
                 padding: 10px 0;
                 border-radius: 10px 10px 0 0;
+              }
+              .header img {
+                width: 80px; /* Ajustar el tamaño según necesites */
               }
               h2 {
                 color: #007bff;
@@ -51,21 +56,24 @@ const enviarCorreo = async (data) => {
           </head>
           <body>
             <div class="header">
+           
               <h2>¡Gracias por tu compra!</h2>
             </div>
-            
+
             <div class="ticket">
               <h3>Detalles del boleto</h3>
-              <p>Película: Avengers: Endgame</p>
-              <p>Fecha: 15 de agosto de 2023</p>
-              <p>Hora: 19:00</p>
-              <p>Número de asientos: 2</p>
-              <p>Total: $20.00</p>
+              <p>Película: ${data.movie}</p>
+              <p>Fecha: ${data.fecha}</p>
+              <p>Hora: ${data.hora}</p>
+              <p>Sala: ${data.sala}</p>
+              <p>Número de asientos: ${data.asientos}</p>
+              <p>Total: Q ${data.total}</p>
             </div>
-            
-            <p>¡Disfruta de la película!</p>
+
+            <p style="text-align: center;">¡Disfruta de la película!</p>
           </body>
-        </html>
+          </html>
+
       `
       };
       
@@ -85,3 +93,5 @@ const enviarCorreo = async (data) => {
 module.exports ={
     enviarCorreo
 }
+
+{/* <img src="ruta_del_logotipo.png" alt="Logo de la compañía"> <!-- Agregar la ruta correcta del logotipo -->/\ */}
